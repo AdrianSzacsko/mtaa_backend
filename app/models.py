@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, SmallInteger
 from sqlalchemy.sql.sqltypes import TIMESTAMP, VARCHAR, TEXT
 
 # from .database import Base
@@ -17,7 +17,7 @@ class User():
     permission = Column(Boolean, nullable=False)  # TODO admin permission, could be Enum
     comments = Column(Integer, nullable=False, default=0)
     reg_date = Column(TIMESTAMP(timezone=False), nullable=False)
-    study_year = Column(Integer, nullable=False)
+    study_year = Column(SmallInteger, nullable=False)
     photo = bytearray  # TODO bytearray Column value
 
 
@@ -58,9 +58,9 @@ class SubjectReview():
 
     message = Column(TEXT, nullable=False)
     review_date = Column(TIMESTAMP(timezone=False), nullable=False, default=TEXT("now()"))
-    difficulty = Column(Integer, nullable=False)
-    usability = Column(Integer, nullable=False)
-    prof_avg = Column(Integer, nullable=False)
+    difficulty = Column(SmallInteger, nullable=False)
+    usability = Column(SmallInteger, nullable=False)
+    prof_avg = Column(SmallInteger, nullable=False)
 
 
 class ProfessorReview():
@@ -71,5 +71,5 @@ class ProfessorReview():
 
     message = Column(TEXT, nullable=False)
     review_date = Column(TIMESTAMP(timezone=False), nullable=False, default=TEXT("now()"))
-    rating = Column(Integer, nullable=False)
+    rating = Column(SmallInteger, nullable=False)
 
