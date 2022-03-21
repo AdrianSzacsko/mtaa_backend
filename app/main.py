@@ -1,7 +1,11 @@
 from fastapi import FastAPI
+from .routers import prof, subj
 
 app = FastAPI()
 
+
+app.include_router(prof.router)
+app.include_router(subj.router)
 
 @app.get("/")
 async def root():
