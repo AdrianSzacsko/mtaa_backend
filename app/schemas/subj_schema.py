@@ -20,6 +20,7 @@ class PostSubjectId(BaseModel):
     subj_r_difficulty: int
     subj_r_usability: int
     subj_r_prof_avg: int
+    user_id: int
 
 
 class PutSubjectId(BaseModel):
@@ -27,3 +28,4 @@ class PutSubjectId(BaseModel):
     subj_r_difficulty: int
     subj_r_usability: int
     subj_r_prof_avg: int
+    user_id: int
