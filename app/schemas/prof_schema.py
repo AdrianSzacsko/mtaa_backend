@@ -2,14 +2,19 @@ from pydantic import BaseModel
 
 
 class GetProfId(BaseModel):
-    prof_first_name: str
-    prof_last_name: str
+    id: int
+    name: str
+    subj_id: int
     subj_name: str
-    prof_review_table_message: str
-    prof_review_table_rating: int
-    user_table_id: int
-    user_table_first_name: str
-    user_table_last_name: str
+    code: str
+
+
+class GetProfIdReviews(BaseModel):
+    id: int
+    message: str
+    rating: int
+    user_id: int
+    user_name: str
 
 
 class PostProfId(BaseModel):

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from sqlalchemy import LargeBinary
 
 
 class GetProfileId(BaseModel):
@@ -14,8 +15,5 @@ class GetProfileId(BaseModel):
 
 
 class GetProfileIdPic(BaseModel):
-    user_photo: bytearray
-
-    class Config:
-        arbitrary_types_allowed = True
+    user_photo: LargeBinary
 
