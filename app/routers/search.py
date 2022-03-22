@@ -31,7 +31,6 @@ def get_search(db: Session = Depends(create_connection), search_string: Optional
               ) as search
                 where search.name like ('%{search_string}%') or search.code like ('%{search_string}%');"""))
     data = rs.fetchall()
-
     return data
 
     """if search_string == '':

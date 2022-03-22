@@ -21,7 +21,7 @@ class User(Base):
     photo = bytearray  # TODO bytearray Column value
 
 
-class Professor():
+class Professor(Base):
     __tablename__ = "professor_table"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -32,7 +32,7 @@ class Professor():
     # TODO FOREIGN KEY FOR SUBJECT????
 
 
-class Subject():
+class Subject(Base):
     __tablename__ = "subject_table"
 
     id = Column(Integer, primary_key=True, nullable=False)
@@ -43,14 +43,14 @@ class Subject():
     prof_id = Column(Integer, ForeignKey("professor_table.id", ondelete="CASCADE"), nullable=False,)
 
 
-class Relation():
+class Relation(Base):
     __tablename__ = "relation_table"
 
     subj_id = Column(Integer, ForeignKey("subject_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
     prof_id = Column(Integer, ForeignKey("professor_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
 
 
-class SubjectReview():
+class SubjectReview(Base):
     __tablename__ = "subj_review_table"
 
     subj_id = Column(Integer, ForeignKey("subject_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
@@ -63,7 +63,7 @@ class SubjectReview():
     prof_avg = Column(SmallInteger, nullable=False)
 
 
-class ProfessorReview():
+class ProfessorReview(Base):
     __tablename__ = "prof_review_table"
 
     prof_id = Column(Integer, ForeignKey("professor_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
