@@ -1,10 +1,10 @@
-from sqlalchemy import Column, Integer, Boolean, ForeignKey, SmallInteger
+from sqlalchemy import Column, Integer, Boolean, ForeignKey, SmallInteger, text
 from sqlalchemy.sql.sqltypes import TIMESTAMP, VARCHAR, TEXT
 
-# from .database import Base
+from .db.base import Base
 
 
-class User():
+class User(Base):
     __tablename__ = "user_table"
 
     # no documentation on whether nullable is False on default
@@ -14,9 +14,9 @@ class User():
     first_name = Column(VARCHAR(20), nullable=False)
     last_name = Column(VARCHAR(20), nullable=False)
     pwd = Column(VARCHAR(30), nullable=False)
-    permission = Column(Boolean, nullable=False)  # TODO admin permission, could be Enum
+    permission = Column(Boolean, nullable=False, default=False)  # TODO admin permission, could be Enum
     comments = Column(Integer, nullable=False, default=0)
-    reg_date = Column(TIMESTAMP(timezone=False), nullable=False)
+    reg_date = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
     study_year = Column(SmallInteger, nullable=False)
     photo = bytearray  # TODO bytearray Column value
 
@@ -57,7 +57,7 @@ class SubjectReview():
     user_id = Column(Integer, ForeignKey("user_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
 
     message = Column(TEXT, nullable=False)
-    review_date = Column(TIMESTAMP(timezone=False), nullable=False, default=TEXT("now()"))
+    review_date = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
     difficulty = Column(SmallInteger, nullable=False)
     usability = Column(SmallInteger, nullable=False)
     prof_avg = Column(SmallInteger, nullable=False)
@@ -70,6 +70,6 @@ class ProfessorReview():
     user_id = Column(Integer, ForeignKey("user_table.id", ondelete="CASCADE"), primary_key=True, nullable=False)
 
     message = Column(TEXT, nullable=False)
-    review_date = Column(TIMESTAMP(timezone=False), nullable=False, default=TEXT("now()"))
+    review_date = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
     rating = Column(SmallInteger, nullable=False)
 

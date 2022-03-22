@@ -1,15 +1,26 @@
 from pydantic import BaseModel
 
 
+class UserRegister(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+    study_year: int
+    pwd: str
+
+
 class PostRegister(BaseModel):
-    user_email: str
-    user_first_name: str
-    user_last_name: str
-    user_permission: bool
-    user_study_year: int
-    user_password: str
+    email: str
+    first_name: str
+    last_name: str
+    permission: bool
+    study_year: int
+    pwd: str
+
+    class Config:
+        orm_mode = True
 
 
 class PostLogin(BaseModel):
-    user_email: str
-    user_password: str
+    email: str
+    pwd: str

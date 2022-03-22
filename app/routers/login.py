@@ -16,14 +16,14 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=Token, name="auth:login")
+@router.post("", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):
 
-    user = db.execute(select(User).filter(User.email == form_data.username).first())
+    user = db.query(select(User).filter(User.email == form_data.username).first())
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Incorrect username or password"
         )
 

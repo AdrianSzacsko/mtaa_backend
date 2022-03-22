@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from ..models import User
-from ..schemas.register_login_schema import PostRegister
+from ..schemas.register_login_schema import PostRegister, UserRegister
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from ..security.passwords import get_password_hash
 from ..db.database import create_connection
@@ -12,19 +13,36 @@ router = APIRouter(
 )
 
 
-@router.post("", status_code=HTTP_201_CREATED, response_model=PostRegister)
-async def register(user: PostRegister, db: Session = Depends(create_connection)):
-    user.password = get_password_hash(user.user_password)
-    """
-    if await check_email_is_taken(user.user_email):
+async def check_email_is_taken(email: str, db: Session = Depends(create_connection)):
+    try:
+        await db.query(User).filter(email == User.email)
+    except (Exception,):
+        return False
+
+    return True
+
+
+@router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister)
+async def register(user: UserRegister, db: Session = Depends(create_connection)):
+    user.pwd = get_password_hash(user.pwd)
+
+    if await check_email_is_taken(user.email):
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail="Email already taken!",
         )
+
+
+    """
+    raise HTTPException(
+        status_code=HTTP_403_FORBIDDEN
+        detail="Incorrect credentials"
+    )
     """
 
-    registered_user = User()
+    registered_user = User(**user.dict())
     db.add(registered_user)
-    db.commit().refresh(registered_user)
+    db.commit()
+    db.refresh(registered_user)
 
     return registered_user
