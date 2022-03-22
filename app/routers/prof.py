@@ -26,3 +26,18 @@ def get_prof(db: Session = Depends(create_connection), prof_id: Optional[int] = 
         .filter(Professor.id == prof_id).all()
     #result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
+
+
+@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfId])
+def get_prof_reviews(db: Session = Depends(create_connection), prof_id: Optional[int] = 0):
+    result = db.query(Professor.id,
+                      func.concat(Professor.first_name, " ", Professor.last_name).label("user_name"),
+                      ProfessorReview.message,
+                      ProfessorReview.rating,
+                      User.id.label("user_id"))
+
+    join_query = result.join(ProfessorReview, Professor.id == ProfessorReview.prof_id)\
+        .join(User, ProfessorReview.user_id == User.id)\
+        .filter(Professor.id == prof_id).all()
+    #result = db.query(Subject).filter(Subject.id == {subj_id}).all()
+    return join_query
