@@ -28,3 +28,20 @@ def get_subject(db: Session = Depends(create_connection), subj_id: Optional[int]
         .filter(Subject.id == subj_id).all()
     #result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
+
+
+@router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews])
+def get_subject(db: Session = Depends(create_connection), subj_id: Optional[int] = 0):
+    result = db.query(Subject.id,
+                      SubjectReview.message,
+                      SubjectReview.prof_avg,
+                      SubjectReview.usability,
+                      SubjectReview.difficulty,
+                      func.concat(User.first_name, " ", User.last_name).label("user_name"),
+                      User.id)
+
+    join_query = result.join(SubjectReview, Subject.id == SubjectReview.subj_id)\
+        .join(User, SubjectReview.user_id == User.id)\
+        .filter(Subject.id == subj_id).all()
+    #result = db.query(Subject).filter(Subject.id == {subj_id}).all()
+    return join_query
