@@ -4,13 +4,14 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 
 from .schemas.auth_schema import TokenData
-
+from .schemas.profile_schema import GetProfileId
+from .settings import settings
 
 # to get a string like this run:
 # openssl rand -hex 32
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -43,5 +44,5 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise credentials_exception
 
-    return token_data.username  # TODO still needs some attribute to be returned
+    return GetProfileId(**jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])).user_id  # TODO still needs some attribute to be returned
 
