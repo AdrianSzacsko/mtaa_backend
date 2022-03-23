@@ -62,14 +62,16 @@ def get_prof_reviews(db: Session = Depends(create_connection),
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfId)
-async def add_subj_review(prof: prof_schema.PostProfId, db: Session = Depends(create_connection)):
+async def add_prof_review(prof: prof_schema.PostProfId,
+                          db: Session = Depends(create_connection),
+                          user: User = Depends(auth.get_current_user)):
     if len(prof.message) <= 2:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail="Message too short!",
         )
 
-    prof_review = ProfessorReview(**prof.dict())
+    prof_review = ProfessorReview(user_id=user.id, **prof.dict())
 
     db.add(prof_review)
     db.commit()
@@ -79,7 +81,9 @@ async def add_subj_review(prof: prof_schema.PostProfId, db: Session = Depends(cr
 
 
 @router.put("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfId)
-async def modify_subj_review(prof: prof_schema.PostProfId, db: Session = Depends(create_connection)):
+async def modify_prof_review(prof: prof_schema.PostProfId,
+                             db: Session = Depends(create_connection),
+                             user: User = Depends(auth.get_current_user)):
     if len(prof.message) <= 2:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
@@ -97,6 +101,13 @@ async def modify_subj_review(prof: prof_schema.PostProfId, db: Session = Depends
             status_code=HTTP_404_NOT_FOUND,
             detail="Review not found!",
         )
+
+    if query_row.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized to perform this action."
+        )
+
     query.update(prof.dict())
     db.commit()
 
