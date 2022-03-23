@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 from ..schemas import subj_schema
 from ..db.database import create_connection
@@ -11,6 +12,18 @@ router = APIRouter(
     prefix="/subj",
     tags=["Subj"]
 )
+
+
+def create_post_subject_id_to_db(subject: subj_schema.PostSubjectId, subj_id: int):
+
+
+    post_subject_id_to_db = subj_schema.PostSubjectId_to_db(subj_id=subj_id,
+                                                            user_id=subject.user_id,
+                                                            message=subject.subj_r_message,
+                                                            difficulty=subject.subj_r_difficulty,
+                                                            prof_avg=subject.subj_r_prof_avg,
+                                                            usability=subject.subj_r_usability)
+    return post_subject_id_to_db
 
 
 @router.get("/", response_model=List[subj_schema.GetSubjectId])
@@ -45,3 +58,22 @@ def get_subject(db: Session = Depends(create_connection), subj_id: Optional[int]
         .filter(Subject.id == subj_id).all()
     #result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
+
+
+@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectId_to_db)
+async def register(subj: subj_schema.PostSubjectId, db: Session = Depends(create_connection), subj_id: Optional[int] = 0):
+    if len(subj.subj_r_message) <= 2:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Message too short!",
+        )
+
+    post_subj_review = create_post_subject_id_to_db(subj, subj_id)
+
+    subj_review = SubjectReview(**post_subj_review.dict())
+
+    db.add(subj_review)
+    db.commit()
+    db.refresh(subj_review)
+
+    return subj_review

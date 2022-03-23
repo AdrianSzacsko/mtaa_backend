@@ -26,9 +26,13 @@ class PostSubjectId(BaseModel):
     user_id: int
 
 
-class PutSubjectId(BaseModel):
-    subj_r_message: str
-    subj_r_difficulty: int
-    subj_r_usability: int
-    subj_r_prof_avg: int
+class PostSubjectId_to_db(BaseModel):
+    message: str
+    difficulty: int
+    usability: int
+    prof_avg: int
     user_id: int
+    subj_id: int
+
+    class Config:
+        orm_mode = True
