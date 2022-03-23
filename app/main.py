@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import prof, subj, login, register, search
+from .routers import prof, subj, login, register, search, profile
 
 app = FastAPI()
 
@@ -9,6 +9,7 @@ app.include_router(subj.router)
 app.include_router(login.router)
 app.include_router(register.router)
 app.include_router(search.router)
+app.include_router(profile.router)
 
 
 @app.get("/")

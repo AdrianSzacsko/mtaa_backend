@@ -5,8 +5,7 @@ from datetime import datetime
 class GetProfileId(BaseModel):
     user_id: int
     user_email: str
-    user_first_name: str
-    user_last_name: str
+    user_name: str
     user_permission: bool
     user_comments: int
     user_reg_date: datetime
