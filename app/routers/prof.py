@@ -26,7 +26,7 @@ def get_prof(db: Session = Depends(create_connection),
 
     if not result:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Professor with {prof_id} was not found."
         )
 
@@ -49,7 +49,7 @@ def get_prof_reviews(db: Session = Depends(create_connection),
 
     if not result:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Review with {prof_id} was not found."
         )
 

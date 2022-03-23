@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..schemas import search_schema
 from ..db.database import create_connection
@@ -8,6 +8,7 @@ from typing import List, Optional
 from ..models import *
 
 from ..db.init_db import engine
+from ..security import auth
 
 router = APIRouter(
     prefix="/search",
@@ -16,7 +17,9 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[search_schema.GetSearch])
-def get_search(db: Session = Depends(create_connection), search_string: Optional[str] = ""):
+def get_search(db: Session = Depends(create_connection),
+               search_string: Optional[str] = "",
+               user: User = Depends(auth.get_current_user)):
     #search_string = '%' + search_string + '%'
     con = engine.connect()
     rs = con.execute(text(f"""select * from (
@@ -31,6 +34,12 @@ def get_search(db: Session = Depends(create_connection), search_string: Optional
               ) as search
                 where search.name like ('%{search_string}%') or search.code like ('%{search_string}%');"""))
     data = rs.fetchall()
+
+    if not data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"There was an error querying desired data."
+        )
     return data
 
     """if search_string == '':
