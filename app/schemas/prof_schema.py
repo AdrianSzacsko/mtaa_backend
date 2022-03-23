@@ -18,12 +18,10 @@ class GetProfIdReviews(BaseModel):
 
 
 class PostProfId(BaseModel):
-    prof_review_table_message: str
-    prof_review_table_rating: int
+    message: str
+    rating: int
     user_id: int
+    prof_id: int
 
-
-class PutProfId(BaseModel):
-    prof_review_table_message: str
-    prof_review_table_rating: int
-    user_id: int
+    class Config:
+        orm_mode = True
