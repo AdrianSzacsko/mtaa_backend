@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, \
+    HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
 
 from ..schemas import profile_schema
 from ..db.database import create_connection
@@ -66,6 +67,12 @@ async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
             detail="Profile not found!",
         )
 
+    if query_row.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized to perform this action."
+        )
+
     updated_profile_pic = profile_schema.PutProfilePic(
         email=query_row.email,
         first_name=query_row.first_name,
@@ -106,3 +113,59 @@ async def switch_admin_permission(profile: profile_schema.SwitchPermission,
     db.commit()
     profile.auth_code = "****"
     return profile.dict()
+
+
+@router.delete("/", status_code=HTTP_200_OK)
+def delete_user_profile(db: Session = Depends(create_connection),
+                        user: User = Depends(auth.get_current_user)):
+    query = db.query(User).filter(User.id == user.id)
+    current_user = query.first()
+
+    if current_user is None:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Profile not found!",
+        )
+
+    if current_user.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized to perform this action."
+        )
+
+    db.delete(current_user)
+    db.commit()
+
+
+@router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic)
+def delete_profile_pic(db: Session = Depends(create_connection),
+                       user: User = Depends(auth.get_current_user)):
+    query = db.query(User).filter(User.id == user.id)
+    query_row = query.first()
+
+    if not query_row:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Profile not found!",
+        )
+
+    if query_row.id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized to perform this action."
+        )
+
+    updated_profile_pic = profile_schema.PutProfilePic(
+        email=query_row.email,
+        first_name=query_row.first_name,
+        last_name=query_row.last_name,
+        permission=query_row.permission,
+        study_year=query_row.study_year,
+        pwd=query_row.pwd,
+        reg_date=query_row.reg_date
+    )
+
+    query.update(updated_profile_pic.dict())
+    db.commit()
+
+    return updated_profile_pic.dict()
