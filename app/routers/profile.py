@@ -57,7 +57,6 @@ def get_profile_pic(db: Session = Depends(create_connection),
 async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
-
     query = db.query(User).filter(User.id == user.id)
     query_row = query.first()
 
@@ -82,3 +81,28 @@ async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
     db.commit()
 
     return updated_profile_pic.dict()
+
+
+@router.put("/admin", status_code=HTTP_201_CREATED, response_model=profile_schema.SwitchPermission)
+async def switch_admin_permission(profile: profile_schema.SwitchPermission,
+                                  db: Session = Depends(create_connection),
+                                  user: User = Depends(auth.get_current_user)):
+    query = db.query(User).filter(User.id == user.id)
+    query_row = query.first()
+
+    if profile.auth_code != "admin1234":
+        raise HTTPException(
+            status_code=HTTP_401_UNAUTHORIZED,
+            detail="Permission denied!"
+        )
+
+    if not query_row:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Profile not found!",
+        )
+
+    query.update({"permission": profile.permission})
+    db.commit()
+    profile.auth_code = "****"
+    return profile.dict()

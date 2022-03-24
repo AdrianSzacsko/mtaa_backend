@@ -32,3 +32,11 @@ class PutProfilePic(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         orm_mode = True
+
+
+class SwitchPermission(BaseModel):
+    auth_code: str
+    permission: bool
+
+    class Config:
+        orm_mode = True
