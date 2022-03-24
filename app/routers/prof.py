@@ -61,14 +61,33 @@ def get_prof_reviews(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut)
-async def add_prof_review(prof: prof_schema.PostProfId,
-                          db: Session = Depends(create_connection),
-                          user: User = Depends(auth.get_current_user)):
+def interval_exception(prof: prof_schema.PostProfId):
     if len(prof.message) <= 2:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail="Message too short!",
+        )
+
+    if not 0 <= prof.rating <= 100:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Rating out of interval!",
+        )
+
+
+@router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut)
+async def add_prof_review(prof: prof_schema.PostProfId,
+                          db: Session = Depends(create_connection),
+                          user: User = Depends(auth.get_current_user)):
+
+    interval_exception(prof)
+
+    query = db.query(ProfessorReview).filter(and_(ProfessorReview.prof_id == prof.prof_id,
+                                                  ProfessorReview.user_id == user.id))
+    if query.first() is not None:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Review already exists, for modification use PUT!",
         )
 
     prof_review = ProfessorReview(user_id=user.id, **prof.dict())
@@ -84,11 +103,8 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
-    if len(prof.message) <= 2:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail="Message too short!",
-        )
+
+    interval_exception(prof)
 
     prof_review = ProfessorReview(user_id=user.id, **prof.dict())
 

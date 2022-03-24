@@ -65,14 +65,45 @@ def get_subject_reviews(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
-async def add_subj_review(subj: subj_schema.PostSubjectId,
-                          db: Session = Depends(create_connection),
-                          user: User = Depends(auth.get_current_user)):
+def interval_exception(subj: subj_schema.PostSubjectId):
     if len(subj.message) <= 2:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail="Message too short!",
+        )
+
+    if not 0 <= subj.prof_avg <= 100:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Rating professor average out of interval!",
+        )
+
+    if not 0 <= subj.difficulty <= 100:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Rating difficulty out of interval!",
+        )
+
+    if not 0 <= subj.usability <= 100:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Rating usability out of interval!",
+        )
+
+
+@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
+async def add_subj_review(subj: subj_schema.PostSubjectId,
+                          db: Session = Depends(create_connection),
+                          user: User = Depends(auth.get_current_user)):
+
+    interval_exception(subj)
+
+    query = db.query(SubjectReview).filter(and_(SubjectReview.subj_id == subj.subj_id,
+                                                SubjectReview.user_id == user.id))
+    if query.first() is not None:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail="Review already exists, for modification use PUT!",
         )
 
     subj_review = SubjectReview(user_id=user.id, **subj.dict())
@@ -88,11 +119,8 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
-    if len(subj.message) <= 2:
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
-            detail="Message too short!",
-        )
+
+    interval_exception(subj)
 
     subj_review = SubjectReview(user_id=user.id, **subj.dict())
 
@@ -111,6 +139,8 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized to perform this action."
         )
+
+
 
     updated_review = subj_schema.PostSubjectIdOut(user_id=user.id, **subj.dict())
     query.update(updated_review.dict())
