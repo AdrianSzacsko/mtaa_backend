@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, Boolean, ForeignKey, SmallInteger, text
+from sqlalchemy.dialects.postgresql import BYTEA
 from sqlalchemy.sql.sqltypes import TIMESTAMP, VARCHAR, TEXT
 
 from .db.base import Base
@@ -18,7 +19,8 @@ class User(Base):
     comments = Column(Integer, nullable=False, default=0)
     reg_date = Column(TIMESTAMP(timezone=False), nullable=False, server_default=text('now()'))
     study_year = Column(SmallInteger, nullable=False)
-    photo = bytearray  # TODO bytearray Column value
+    # photo = bytes
+    photo = Column(BYTEA, nullable=True)
 
 
 class Professor(Base):

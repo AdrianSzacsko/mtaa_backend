@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from ..schemas import profile_schema
 from ..db.database import create_connection
@@ -26,14 +27,14 @@ def get_profile(db: Session = Depends(create_connection),
                       User.reg_date.label("user_reg_date"),
                       User.study_year.label("user_study_year"))
 
-    if not result:
+    filter_query = result.filter(User.id == profile_id).all()
+
+    if filter_query is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile with {profile_id} was not found."
         )
-
-    join_query = result.filter(User.id == profile_id).all()
-    return join_query
+    return filter_query
 
 
 @router.get("/{profile_id}/pic", response_model=List[profile_schema.GetProfileId])
@@ -41,12 +42,43 @@ def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
     result = db.query(User.photo.label("user_photo"))
+    filter_query = result.filter(User.id == profile_id).all()
 
-    if not result:
+    if filter_query is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile picture related to id {profile_id} was not found."
         )
 
-    join_query = result.filter(User.id == profile_id).all()
-    return join_query
+    return filter_query
+
+
+@router.put("/pic", status_code=HTTP_201_CREATED, response_model=profile_schema.PutProfilePic)
+async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
+                          db: Session = Depends(create_connection),
+                          user: User = Depends(auth.get_current_user)):
+
+    query = db.query(User).filter(User.id == user.id)
+    query_row = query.first()
+
+    if not query_row:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Profile not found!",
+        )
+
+    updated_profile_pic = profile_schema.PutProfilePic(
+        email=query_row.email,
+        first_name=query_row.first_name,
+        last_name=query_row.last_name,
+        permission=query_row.permission,
+        study_year=query_row.study_year,
+        pwd=query_row.pwd,
+        photo=profile.user_photo,
+        reg_date=query_row.reg_date
+    )
+
+    query.update(updated_profile_pic.dict())
+    db.commit()
+
+    return updated_profile_pic.dict()
