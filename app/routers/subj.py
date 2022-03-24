@@ -84,7 +84,7 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
     return subj_review
 
 
-@router.put("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectId)
+@router.put("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
@@ -94,10 +94,10 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
             detail="Message too short!",
         )
 
-    subj_review = SubjectReview(**subj.dict())
+    subj_review = SubjectReview(user_id=user.id, **subj.dict())
 
     query = db.query(SubjectReview).filter(and_(SubjectReview.subj_id == subj_review.subj_id,
-                                                SubjectReview.user_id == subj_review.user_id))
+                                                SubjectReview.user_id == user.id))
 
     query_row = query.first()
     if not query_row:
@@ -112,6 +112,8 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
             detail="Unauthorized to perform this action."
         )
 
+    updated_review = subj_schema.PostSubjectIdOut(user_id=user.id, **subj.dict())
+    query.update(updated_review.dict())
     query.update(subj.dict())
     db.commit()
 
