@@ -20,6 +20,15 @@ class GetProfIdReviews(BaseModel):
 class PostProfId(BaseModel):
     message: str
     rating: int
+    prof_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class PostProfIdOut(BaseModel):
+    message: str
+    rating: int
     user_id: int
     prof_id: int
 

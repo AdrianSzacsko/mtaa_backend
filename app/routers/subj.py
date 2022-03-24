@@ -65,7 +65,7 @@ def get_subject_reviews(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectId)
+@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
 async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):

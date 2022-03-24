@@ -23,6 +23,17 @@ class PostSubjectId(BaseModel):
     difficulty: int
     usability: int
     prof_avg: int
+    subj_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class PostSubjectIdOut(BaseModel):
+    message: str
+    difficulty: int
+    usability: int
+    prof_avg: int
     user_id: int
     subj_id: int
 
