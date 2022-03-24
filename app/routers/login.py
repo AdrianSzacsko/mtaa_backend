@@ -1,3 +1,7 @@
+# SOURCE:
+# https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
+
+
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
@@ -9,6 +13,7 @@ from ..db.database import create_connection
 from ..settings import settings
 from ..security import auth
 from ..models import User
+from ..security.passwords import verify_password
 
 router = APIRouter(
     prefix="/login",
@@ -22,6 +27,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
 
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incorrect username or password"
+        )
+
+    if not verify_password(form_data.password, user.pwd):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Incorrect username or password"
