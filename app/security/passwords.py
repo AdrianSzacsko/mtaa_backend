@@ -1,3 +1,7 @@
+# SOURCE:
+# https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/
+
+
 import bcrypt
 from passlib.context import CryptContext
 

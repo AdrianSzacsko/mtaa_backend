@@ -1,3 +1,7 @@
+# SOURCE:
+# https://fastapi.tiangolo.com/tutorial/security/simple-oauth2/
+
+
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
@@ -9,6 +13,7 @@ from app.schemas.auth_schema import TokenData
 from app.schemas.profile_schema import GetProfileId
 from app.settings import settings
 from app.db.database import create_connection
+
 
 # to get a string like this run:
 # openssl rand -hex 32
