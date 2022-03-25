@@ -15,10 +15,21 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[prof_schema.GetProfId])
+@router.get("/", response_model=List[prof_schema.GetProfId],
+            summary="Retrieves professor's profile.")
 def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
              user: User = Depends(auth.get_current_user)):
+    """
+        Parameters:
+
+        - **id**: primary key representing professor
+        - **name**: professor's full name
+        - **subj_id**: id of a subject, that the professor teaches
+        - **subj_name**: full name according to the subj_id
+        - **code**: short form of the subj_name, typically an acronym
+    """
+
     result = db.query(Professor.id,
                       func.concat(Professor.first_name, " ", Professor.last_name).label("name"),
                       Subject.id.label("subj_id"),

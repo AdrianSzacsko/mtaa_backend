@@ -21,9 +21,16 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Token)
+@router.post("/", response_model=Token,
+             summary="Simple login form with password verification and token creation.")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):
+    """
+        Parameters:
+
+        - **username**: user's email
+        - **password**: user's unhashed password
+    """
 
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
