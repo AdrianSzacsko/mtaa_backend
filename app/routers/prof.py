@@ -21,7 +21,7 @@ def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
              user: User = Depends(auth.get_current_user)):
     """
-        Parameters:
+        Response values:
 
         - **id**: primary key representing professor
         - **name**: professor's full name

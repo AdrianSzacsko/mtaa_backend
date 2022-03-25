@@ -26,7 +26,7 @@ router = APIRouter(
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):
     """
-        Parameters:
+        Response values:
 
         - **username**: user's email
         - **password**: user's unhashed password
