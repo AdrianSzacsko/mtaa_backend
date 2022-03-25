@@ -23,7 +23,7 @@ def increment_comment(db: Session, user: User):
     db.commit()
 
 
-@router.get("/", response_model=List[profile_schema.GetProfileId])
+@router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK)
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -45,7 +45,7 @@ def get_profile(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.get("/{profile_id}/pic", response_model=profile_schema.GetProfileIdPic)
+@router.get("/{profile_id}/pic", response_model=profile_schema.GetProfileIdPic, status_code=HTTP_200_OK)
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -67,7 +67,7 @@ def get_profile_pic(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.put("/pic", status_code=HTTP_201_CREATED, response_model=profile_schema.PutProfilePic)
+@router.put("/pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic)
 async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -103,7 +103,7 @@ async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
     return updated_profile_pic.dict()
 
 
-@router.put("/admin", status_code=HTTP_201_CREATED, response_model=profile_schema.SwitchPermission)
+@router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission)
 async def switch_admin_permission(profile: profile_schema.SwitchPermission,
                                   db: Session = Depends(create_connection),
                                   user: User = Depends(auth.get_current_user)):

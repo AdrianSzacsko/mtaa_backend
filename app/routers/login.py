@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_200_OK
 
 from ..schemas.auth_schema import Token
 from ..db.database import create_connection
@@ -21,7 +22,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=Token,
+@router.post("/", response_model=Token, status_code=HTTP_200_OK,
              summary="Simple login form with password verification and token creation.")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):

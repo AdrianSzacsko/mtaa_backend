@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from starlette.status import HTTP_200_OK
 
 from ..schemas import search_schema
 from ..db.database import create_connection
@@ -16,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[search_schema.GetSearch])
+@router.get("/", response_model=List[search_schema.GetSearch], status_code=HTTP_200_OK)
 def get_search(db: Session = Depends(create_connection),
                search_string: Optional[str] = "",
                user: User = Depends(auth.get_current_user)):

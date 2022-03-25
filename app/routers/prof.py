@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
 
 from .profile import increment_comment
 from ..schemas import prof_schema
@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[prof_schema.GetProfId],
+@router.get("/", response_model=List[prof_schema.GetProfId], status_code=HTTP_200_OK,
             summary="Retrieves professor's profile.")
 def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
@@ -50,7 +50,7 @@ def get_prof(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews],
+@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews], status_code=HTTP_200_OK,
             summary="Retrieves reviews for specific professor.")
 def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
@@ -139,7 +139,7 @@ async def add_prof_review(prof: prof_schema.PostProfId,
     return prof_review
 
 
-@router.put("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
+@router.put("/", status_code=HTTP_200_OK, response_model=prof_schema.PostProfIdOut,
             summary="Modifies a review.")
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
