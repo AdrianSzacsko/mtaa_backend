@@ -16,6 +16,13 @@ router = APIRouter(
 )
 
 
+def increment_comment(db: Session, user: User):
+    user_query = db.query(User).filter(User.id == user.id)
+    user_comment = user_query.first().comments
+    user_query.update({"comments": user_comment + 1})
+    db.commit()
+
+
 @router.get("/", response_model=List[profile_schema.GetProfileId])
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,

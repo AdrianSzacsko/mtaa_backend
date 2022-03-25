@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
+from .profile import increment_comment
 from ..schemas import subj_schema
 from ..db.database import create_connection
 from sqlalchemy.orm import Session, aliased
@@ -112,6 +113,8 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
     db.add(subj_review)
     db.commit()
     db.refresh(subj_review)
+
+    increment_comment(db, user)
 
     return subj_review
 

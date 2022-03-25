@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
+from .profile import increment_comment
 from ..schemas import prof_schema
 from ..db.database import create_connection
 from sqlalchemy.orm import Session
@@ -95,6 +96,8 @@ async def add_prof_review(prof: prof_schema.PostProfId,
     db.add(prof_review)
     db.commit()
     db.refresh(prof_review)
+
+    increment_comment(db, user)
 
     return prof_review
 
