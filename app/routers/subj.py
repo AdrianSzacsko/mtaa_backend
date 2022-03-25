@@ -108,6 +108,12 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
             detail="Review already exists, for modification use PUT!",
         )
 
+    if len(db.query(Subject).filter(Subject.id == subj.subj_id).all()) == 0:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Subject not found!",
+        )
+
     subj_review = SubjectReview(user_id=user.id, **subj.dict())
 
     db.add(subj_review)

@@ -33,7 +33,7 @@ def get_prof(db: Session = Depends(create_connection),
     if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Professor with {prof_id} was not found."
+            detail=f"Professor with ID {prof_id} was not found."
         )
 
     return join_query
@@ -85,10 +85,17 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 
     query = db.query(ProfessorReview).filter(and_(ProfessorReview.prof_id == prof.prof_id,
                                                   ProfessorReview.user_id == user.id))
-    if query.first() is not None:
+    query_row = query.first()
+    if query_row is not None:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
             detail="Review already exists, for modification use PUT!",
+        )
+
+    if len(db.query(Professor).filter(Professor.id == prof.prof_id).all()) == 0:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Professor not found!",
         )
 
     prof_review = ProfessorReview(user_id=user.id, **prof.dict())

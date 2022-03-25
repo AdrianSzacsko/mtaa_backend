@@ -37,7 +37,7 @@ def get_profile(db: Session = Depends(create_connection),
 
     filter_query = result.filter(User.id == profile_id).all()
 
-    if filter_query is None:
+    if len(filter_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile with {profile_id} was not found."
@@ -45,14 +45,20 @@ def get_profile(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.get("/{profile_id}/pic", response_model=List[profile_schema.GetProfileId])
+@router.get("/{profile_id}/pic", response_model=profile_schema.GetProfileIdPic)
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
     result = db.query(User.photo.label("user_photo"))
-    filter_query = result.filter(User.id == profile_id).all()
+    filter_query = result.filter(User.id == profile_id).first()
 
     if filter_query is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Profile related to id {profile_id} was not found."
+        )
+
+    if filter_query[0] is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile picture related to id {profile_id} was not found."
