@@ -50,10 +50,21 @@ def get_prof(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews])
+@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews],
+            summary="Retrieves reviews for specific professor.")
 def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
                      user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **id**: primary key representing professor
+        - **message**: text of the review itself
+        - **rating**: numerical evaluation of the professor
+        - **user_id**: author of the review
+        - **user_name**: full name of the author
+    """
+
     result = db.query(Professor.id,
                       func.concat(Professor.first_name, " ", Professor.last_name).label("user_name"),
                       ProfessorReview.message,
@@ -87,11 +98,19 @@ def interval_exception(prof: prof_schema.PostProfId):
         )
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut)
+@router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
+             summary="Adds a review.")
 async def add_prof_review(prof: prof_schema.PostProfId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
 
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **user_id**: author's id
+        - **prof_id**: id of the reviewed professor
+    """
     interval_exception(prof)
 
     query = db.query(ProfessorReview).filter(and_(ProfessorReview.prof_id == prof.prof_id,
@@ -113,10 +132,19 @@ async def add_prof_review(prof: prof_schema.PostProfId,
     return prof_review
 
 
-@router.put("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut)
+@router.put("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
+            summary="Modifies a review.")
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **user_id**: author's id
+        - **prof_id**: id of the reviewed professor
+    """
 
     interval_exception(prof)
 
