@@ -25,20 +25,20 @@ def get_prof(db: Session = Depends(create_connection),
                       Subject.name.label("subj_name"),
                       Subject.code.label("code"))
 
-    if not result:
+    join_query = result.join(Relation, Professor.id == Relation.prof_id) \
+        .join(Subject, Relation.subj_id == Subject.id) \
+        .filter(Professor.id == prof_id).all()
+
+    if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Professor with {prof_id} was not found."
         )
 
-    join_query = result.join(Relation, Professor.id == Relation.prof_id) \
-        .join(Subject, Relation.subj_id == Subject.id) \
-        .filter(Professor.id == prof_id).all()
-
     return join_query
 
 
-@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfId])
+@router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews])
 def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
                      user: User = Depends(auth.get_current_user)):
@@ -48,15 +48,15 @@ def get_prof_reviews(db: Session = Depends(create_connection),
                       ProfessorReview.rating,
                       User.id.label("user_id"))
 
-    if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Review with {prof_id} was not found."
-        )
-
     join_query = result.join(ProfessorReview, Professor.id == ProfessorReview.prof_id) \
         .join(User, ProfessorReview.user_id == User.id) \
         .filter(Professor.id == prof_id).all()
+
+    if len(join_query) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Professor review with id:{prof_id} was not found."
+        )
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
 

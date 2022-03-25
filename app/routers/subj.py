@@ -26,16 +26,17 @@ def get_subject(db: Session = Depends(create_connection),
                       func.concat(Professor1.first_name, " ", Professor1.last_name).label("teachers"),
                       func.concat(Professor2.first_name, " ", Professor2.last_name).label("garant"))
 
-    if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Subject with id:{subj_id} was not found."
-        )
-
     join_query = result.join(Relation, Subject.id == Relation.subj_id) \
         .join(Professor1, Relation.prof_id == Professor1.id) \
         .join(Professor2, Subject.prof_id == Professor2.id) \
         .filter(Subject.id == subj_id).all()
+
+    if len(join_query) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Subject review with id:{subj_id} was not found."
+        )
+
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
 
@@ -50,17 +51,17 @@ def get_subject_reviews(db: Session = Depends(create_connection),
                       SubjectReview.usability,
                       SubjectReview.difficulty,
                       func.concat(User.first_name, " ", User.last_name).label("user_name"),
-                      User.id)
-
-    if not result:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Subject review with id:{subj_id} was not found."
-        )
+                      User.id.label("user_id"))
 
     join_query = result.join(SubjectReview, Subject.id == SubjectReview.subj_id) \
         .join(User, SubjectReview.user_id == User.id) \
         .filter(Subject.id == subj_id).all()
+
+    if len(join_query) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Subject review with id:{subj_id} was not found."
+        )
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
 

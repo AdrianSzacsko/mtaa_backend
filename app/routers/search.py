@@ -32,12 +32,12 @@ def get_search(db: Session = Depends(create_connection),
                   select concat(u.first_name, ' ', u.last_name) as name, 'USER' as code, u.id
                   from user_table u
               ) as search
-                where search.name like ('%{search_string}%') or search.code like ('%{search_string}%');"""))
+                where lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%');"""))
     data = rs.fetchall()
 
     if not data:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"There was an error querying desired data."
         )
     return data
