@@ -11,7 +11,7 @@ from ..security import auth
 
 router = APIRouter(
     prefix="/prof",
-    tags=["Prof"]
+    tags=["Professors"]
 )
 
 

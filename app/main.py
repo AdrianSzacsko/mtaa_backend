@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from .routers import prof, subj, login, register, search, profile
 
-app = FastAPI()
+# SOURCE: https://fastapi.tiangolo.com/tutorial/metadata/
+from app.metadata import *
+
+
+app = FastAPI(openapi_tags=tags_metadata)
 
 
 app.include_router(prof.router)
