@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_201_CREATED, HTTP_403_FORBIDDEN
 from ..models import User
 from ..schemas.register_login_schema import PostRegister, UserRegister
 from sqlalchemy import select
@@ -55,7 +55,7 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
 
     if check_password_length(user.pwd):
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Incorrect password",
         )
     else:
@@ -63,13 +63,13 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
 
     if await check_email_validity(user.email):
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Incorrect email form",
         )
 
     if await check_email_is_taken(user.email):
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Email already taken!",
         )
 

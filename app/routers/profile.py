@@ -191,7 +191,7 @@ def delete_user_profile(db: Session = Depends(create_connection),
 
 
 @router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic,
-            summary="Deletes current profile picture.")
+            summary="Deletes current profile picture. **This API call was marked as DELETE in first doc.**")
 def delete_profile_pic(db: Session = Depends(create_connection),
                        user: User = Depends(auth.get_current_user)):
     """

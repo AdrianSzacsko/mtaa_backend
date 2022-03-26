@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, \
+    HTTP_200_OK, HTTP_403_FORBIDDEN
 
 from .profile import increment_comment
 from ..schemas import subj_schema
@@ -93,7 +94,7 @@ def get_subject_reviews(db: Session = Depends(create_connection),
 def interval_exception(subj: subj_schema.PostSubjectId):
     if len(subj.message) <= 2:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Message too short!",
         )
 
