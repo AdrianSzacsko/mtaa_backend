@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
 
 from .profile import increment_comment
 from ..schemas import subj_schema
@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[subj_schema.GetSubjectId])
+@router.get("/", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK)
 def get_subject(db: Session = Depends(create_connection),
                 subj_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -42,7 +42,7 @@ def get_subject(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews])
+@router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews], status_code=HTTP_200_OK)
 def get_subject_reviews(db: Session = Depends(create_connection),
                         subj_id: Optional[int] = 0,
                         user: User = Depends(auth.get_current_user)):
@@ -125,7 +125,7 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
     return subj_review
 
 
-@router.put("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
+@router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut)
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):

@@ -26,7 +26,7 @@ def increment_comment(db: Session, user: User):
     db.commit()
 
 
-@router.get("/", response_model=List[profile_schema.GetProfileId])
+@router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK)
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -48,7 +48,7 @@ def get_profile(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.get("/{profile_id}/pic")
+@router.get("/{profile_id}/pic", status_code=HTTP_200_OK)
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -68,7 +68,6 @@ def get_profile_pic(db: Session = Depends(create_connection),
         )
     image_type = magic.from_buffer(filter_query[0], mime=True)
     return Response(content=filter_query[0], media_type=image_type)
-    #return filter_query
 
 
 def check_if_picture(file: UploadFile = File(...)):
@@ -89,8 +88,7 @@ def check_if_picture(file: UploadFile = File(...)):
     return file_bytes
 
 
-
-@router.put("/pic", status_code=HTTP_201_CREATED)
+@router.put("/pic", status_code=HTTP_200_OK)
 async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -115,7 +113,7 @@ async def add_profile_pic(file: UploadFile = File(...),
     return StreamingResponse(io.BytesIO(file_bytes), media_type=file.content_type)
 
 
-@router.put("/admin", status_code=HTTP_201_CREATED, response_model=profile_schema.SwitchPermission)
+@router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission)
 async def switch_admin_permission(profile: profile_schema.SwitchPermission,
                                   db: Session = Depends(create_connection),
                                   user: User = Depends(auth.get_current_user)):
