@@ -26,17 +26,30 @@ def increment_comment(db: Session, user: User):
     db.commit()
 
 
-@router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK)
+@router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
+            summary="Retrieves user profile.")
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
-    result = db.query(User.id.label("user_id"),
-                      User.email.label("user_email"),
-                      func.concat(User.first_name, " ", User.last_name).label("user_name"),
-                      User.permission.label("user_permission"),
-                      User.comments.label("user_comments"),
-                      User.reg_date.label("user_reg_date"),
-                      User.study_year.label("user_study_year"))
+    """
+        Response values:
+
+        - **id**: unique identifier
+        - **email**: unique email, also serves as username
+        - **name**: user's real name
+        - **permission**: whether admin permission is granted
+        - **comments**: number of posted reviews
+        - **reg_date**: registration date
+        - **study_year**: current year of study
+    """
+
+    result = db.query(User.id.label("id"),
+                      User.email.label("email"),
+                      func.concat(User.first_name, " ", User.last_name).label("name"),
+                      User.permission.label("permission"),
+                      User.comments.label("comments"),
+                      User.reg_date.label("reg_date"),
+                      User.study_year.label("study_year"))
 
     filter_query = result.filter(User.id == profile_id).all()
 
@@ -48,10 +61,17 @@ def get_profile(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.get("/{profile_id}/pic", status_code=HTTP_200_OK)
+@router.get("/{profile_id}/pic", status_code=HTTP_200_OK,
+            summary="Retrieves user profile picture.")
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - binary form of profile picture
+    """
+
     result = db.query(User.photo.label("user_photo"))
     filter_query = result.filter(User.id == profile_id).first()
 
@@ -88,7 +108,8 @@ def check_if_picture(file: UploadFile = File(...)):
     return file_bytes
 
 
-@router.put("/pic", status_code=HTTP_200_OK)
+@router.put("/pic", status_code=HTTP_200_OK,
+            summary="Posts new profile picture.")
 async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -113,10 +134,18 @@ async def add_profile_pic(file: UploadFile = File(...),
     return StreamingResponse(io.BytesIO(file_bytes), media_type=file.content_type)
 
 
-@router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission)
+@router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission,
+            summary="Grants admin permissions to the user. **This API call was not present in first doc.**")
 async def switch_admin_permission(profile: profile_schema.SwitchPermission,
                                   db: Session = Depends(create_connection),
                                   user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **auth_code**: unique password that grants admin permission
+        - **permission**: boolean result
+    """
+
     query = db.query(User).filter(User.id == user.id)
     query_row = query.first()
 
@@ -138,7 +167,8 @@ async def switch_admin_permission(profile: profile_schema.SwitchPermission,
     return profile.dict()
 
 
-@router.delete("/", status_code=HTTP_200_OK)
+@router.delete("/", status_code=HTTP_200_OK,
+               summary="Deletes user profile.")
 def delete_user_profile(db: Session = Depends(create_connection),
                         user: User = Depends(auth.get_current_user)):
     query = db.query(User).filter(User.id == user.id)
@@ -160,9 +190,16 @@ def delete_user_profile(db: Session = Depends(create_connection),
     db.commit()
 
 
-@router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic)
+@router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic,
+            summary="Deletes current profile picture.")
 def delete_profile_pic(db: Session = Depends(create_connection),
                        user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **photo**: empty photo value
+    """
+
     query = db.query(User).filter(User.id == user.id)
     query_row = query.first()
 
@@ -178,17 +215,7 @@ def delete_profile_pic(db: Session = Depends(create_connection),
             detail="Unauthorized to perform this action."
         )
 
-    updated_profile_pic = profile_schema.PutProfilePic(
-        email=query_row.email,
-        first_name=query_row.first_name,
-        last_name=query_row.last_name,
-        permission=query_row.permission,
-        study_year=query_row.study_year,
-        pwd=query_row.pwd,
-        reg_date=query_row.reg_date
-    )
-
-    query.update(updated_profile_pic.dict())
+    query.update({"photo": None})
     db.commit()
 
-    return updated_profile_pic.dict()
+    return {"photo": None}

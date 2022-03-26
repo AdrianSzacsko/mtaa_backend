@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class GetSubjectId(BaseModel):
-    id: str
+    id: int
     name: str
     teachers: str
     garant: str

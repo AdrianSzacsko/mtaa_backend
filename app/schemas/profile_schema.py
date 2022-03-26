@@ -4,13 +4,13 @@ from typing import Optional
 
 
 class GetProfileId(BaseModel):
-    user_id: int
-    user_email: str
-    user_name: str
-    user_permission: bool
-    user_comments: int
-    user_reg_date: date
-    user_study_year: int
+    id: int
+    email: str
+    name: str
+    permission: bool
+    comments: int
+    reg_date: date
+    study_year: int
 
 
 class GetProfileIdPic(BaseModel):
@@ -21,14 +21,7 @@ class GetProfileIdPic(BaseModel):
 
 
 class PutProfilePic(BaseModel):
-    email: str
-    first_name: str
-    last_name: str
-    permission: bool
-    study_year: int
-    pwd: str
     photo: Optional[bytes]
-    reg_date: date
 
     class Config:
         arbitrary_types_allowed = True

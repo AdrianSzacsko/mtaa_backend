@@ -16,10 +16,20 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK)
+@router.get("/", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK,
+            summary="Retrieves subject's profile.")
 def get_subject(db: Session = Depends(create_connection),
                 subj_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **id**: primary key representing subject
+        - **name**: subjects's full name
+        - **teachers**: list of professor's that teach this subject
+        - **garant**: boss of this subject
+    """
+
     Professor1 = aliased(Professor)
     Professor2 = aliased(Professor)
 
@@ -42,10 +52,23 @@ def get_subject(db: Session = Depends(create_connection),
     return join_query
 
 
-@router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews], status_code=HTTP_200_OK)
+@router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews],
+            status_code=HTTP_200_OK, summary="Retrieves reviews for specific subject.")
 def get_subject_reviews(db: Session = Depends(create_connection),
                         subj_id: Optional[int] = 0,
                         user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **id**: primary key representing subject
+        - **message**: text of the review itself
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_name**: full name of the author
+        - **user_id**: author's id
+    """
+
     result = db.query(Subject.id,
                       SubjectReview.message,
                       SubjectReview.prof_avg,
@@ -93,10 +116,21 @@ def interval_exception(subj: subj_schema.PostSubjectId):
         )
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut)
+@router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut,
+             summary="Adds a review.")
 async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_id**: author's id
+        - **subj_id**: id of the reviewed subject
+    """
 
     interval_exception(subj)
 
@@ -125,10 +159,21 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
     return subj_review
 
 
-@router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut)
+@router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut,
+            summary="Modifies a review.")
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_id**: author's id
+        - **subj_id**: id of the reviewed subject
+    """
 
     interval_exception(subj)
 

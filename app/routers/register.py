@@ -39,8 +39,20 @@ async def check_email_validity(email: str):
     return True
 
 
-@router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister)
+@router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister,
+             summary="Registers new user.")
 async def register(user: UserRegister, db: Session = Depends(create_connection)):
+    """
+        Response values:
+
+        - **email**: user's email
+        - **first_name**: user's first name
+        - **last_name**: user's last name
+        - **permission**: default false
+        - **study_year**: current study year
+        - **pwd**: hashed password
+    """
+
     if check_password_length(user.pwd):
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,

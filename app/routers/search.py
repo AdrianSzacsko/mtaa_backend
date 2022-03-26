@@ -17,10 +17,19 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[search_schema.GetSearch], status_code=HTTP_200_OK)
+@router.get("/", response_model=List[search_schema.GetSearch], status_code=HTTP_200_OK,
+            summary="Looks up any profile.")
 def get_search(db: Session = Depends(create_connection),
                search_string: Optional[str] = "",
                user: User = Depends(auth.get_current_user)):
+    """
+        Response values:
+
+        - **name**: full name of professor, user or object
+        - **code**: shortcut for name
+        - **id**: unique identifier for given entity
+    """
+
     #search_string = '%' + search_string + '%'
     con = engine.connect()
     rs = con.execute(text(f"""select * from (
