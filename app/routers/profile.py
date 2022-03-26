@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from starlette.status import HTTP_201_CREATED, HTTP_401_UNAUTHORIZED, \
-    HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
+    HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.responses import StreamingResponse, Response
 
 from ..schemas import profile_schema
 from ..db.database import create_connection
@@ -9,6 +10,8 @@ from sqlalchemy import func, union, select, or_, alias, text
 from typing import List, Optional
 from ..models import *
 from ..security import auth
+import io
+import magic
 
 router = APIRouter(
     prefix="/profile",
@@ -45,7 +48,7 @@ def get_profile(db: Session = Depends(create_connection),
     return filter_query
 
 
-@router.get("/{profile_id}/pic", response_model=profile_schema.GetProfileIdPic)
+@router.get("/{profile_id}/pic")
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -63,12 +66,32 @@ def get_profile_pic(db: Session = Depends(create_connection),
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile picture related to id {profile_id} was not found."
         )
+    image_type = magic.from_buffer(filter_query[0], mime=True)
+    return Response(content=filter_query[0], media_type=image_type)
+    #return filter_query
 
-    return filter_query
+
+def check_if_picture(file: UploadFile = File(...)):
+    # check_filetype
+    supported_files = ["image/jpeg", "image/jpg", "image/png"]
+    if file.content_type not in supported_files:
+        raise HTTPException(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Unsupported file type!",
+        )
+    file_bytes = file.file.read()
+    size = len(file_bytes)
+    if size > 3 * 1024 * 1024: #3MB = 3*1024 KB = 3* 1024 * 1024
+        raise HTTPException(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="File too large",
+        )
+    return file_bytes
 
 
-@router.put("/pic", status_code=HTTP_201_CREATED, response_model=profile_schema.PutProfilePic)
-async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
+
+@router.put("/pic", status_code=HTTP_201_CREATED)
+async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
     query = db.query(User).filter(User.id == user.id)
@@ -86,21 +109,10 @@ async def add_profile_pic(profile: profile_schema.GetProfileIdPic,
             detail="Unauthorized to perform this action."
         )
 
-    updated_profile_pic = profile_schema.PutProfilePic(
-        email=query_row.email,
-        first_name=query_row.first_name,
-        last_name=query_row.last_name,
-        permission=query_row.permission,
-        study_year=query_row.study_year,
-        pwd=query_row.pwd,
-        photo=profile.user_photo,
-        reg_date=query_row.reg_date
-    )
-
-    query.update(updated_profile_pic.dict())
+    file_bytes = check_if_picture(file)
+    query.update({"photo": file_bytes})
     db.commit()
-
-    return updated_profile_pic.dict()
+    return StreamingResponse(io.BytesIO(file_bytes), media_type=file.content_type)
 
 
 @router.put("/admin", status_code=HTTP_201_CREATED, response_model=profile_schema.SwitchPermission)
