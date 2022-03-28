@@ -13,7 +13,9 @@ from ..security import auth
 
 router = APIRouter(
     prefix="/search",
-    tags=["Search"]
+    tags=["Search"],
+    responses={401: {"description": "Unauthorized"},
+               404: {"description": "Not found"}}
 )
 
 

@@ -13,12 +13,14 @@ from ..security import auth
 
 router = APIRouter(
     prefix="/subj",
-    tags=["Subjects"]
+    tags=["Subjects"],
+    responses={401: {"description": "Unauthorized"}}
 )
 
 
 @router.get("/", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK,
-            summary="Retrieves subject's profile.")
+            summary="Retrieves subject's profile.",
+            responses={404: {"description": "Subject review not found"}})
 def get_subject(db: Session = Depends(create_connection),
                 subj_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -54,7 +56,8 @@ def get_subject(db: Session = Depends(create_connection),
 
 
 @router.get("/{subj_id}/reviews", response_model=List[subj_schema.GetSubjectIdReviews],
-            status_code=HTTP_200_OK, summary="Retrieves reviews for specific subject.")
+            status_code=HTTP_200_OK, summary="Retrieves reviews for specific subject.",
+            responses={404: {"description": "Subject review not found"}})
 def get_subject_reviews(db: Session = Depends(create_connection),
                         subj_id: Optional[int] = 0,
                         user: User = Depends(auth.get_current_user)):
@@ -118,7 +121,10 @@ def interval_exception(subj: subj_schema.PostSubjectId):
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut,
-             summary="Adds a review.")
+             summary="Adds a review.",
+             responses={404: {"description": "Subject review not found!"},
+                        400: {"description": "Interval error"},
+                        403: {"description": "Message too short"}})
 async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -161,7 +167,11 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
 
 
 @router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut,
-            summary="Modifies a review.")
+            summary="Modifies a review.",
+            responses={404: {"description": "Subject review not found!"},
+                       400: {"description": "Interval error"},
+                       403: {"description": "Message too short"}}
+            )
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
@@ -195,8 +205,6 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Unauthorized to perform this action."
         )
-
-
 
     updated_review = subj_schema.PostSubjectIdOut(user_id=user.id, **subj.dict())
     query.update(updated_review.dict())

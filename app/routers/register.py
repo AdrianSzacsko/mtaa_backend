@@ -40,7 +40,8 @@ async def check_email_validity(email: str):
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister,
-             summary="Registers new user.")
+             summary="Registers new user.",
+             responses={403: {"description": "Incorrect credentials"}})
 async def register(user: UserRegister, db: Session = Depends(create_connection)):
     """
         Response values:

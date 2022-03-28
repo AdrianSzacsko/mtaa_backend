@@ -23,7 +23,8 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Token, status_code=HTTP_200_OK,
-             summary="Simple login form with password verification and token creation.")
+             summary="Simple login form with password verification and token creation.",
+             responses={403: {"description": "Incorrect credentials"}})
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):
     """

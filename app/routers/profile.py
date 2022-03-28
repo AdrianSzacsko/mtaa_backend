@@ -15,7 +15,8 @@ import magic
 
 router = APIRouter(
     prefix="/profile",
-    tags=["Profile"]
+    tags=["Profile"],
+    responses={401: {"description": "Unauthorized"}}
 )
 
 
@@ -27,7 +28,8 @@ def increment_comment(db: Session, user: User):
 
 
 @router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
-            summary="Retrieves user profile.")
+            summary="Retrieves user profile.",
+            responses={404: {"description": "Profile Not Found"}})
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -62,7 +64,8 @@ def get_profile(db: Session = Depends(create_connection),
 
 
 @router.get("/{profile_id}/pic", status_code=HTTP_200_OK,
-            summary="Retrieves user profile picture.")
+            summary="Retrieves user profile picture.",
+            responses={404: {"description": "Not Found"}})
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -100,7 +103,7 @@ def check_if_picture(file: UploadFile = File(...)):
         )
     file_bytes = file.file.read()
     size = len(file_bytes)
-    if size > 3 * 1024 * 1024: #3MB = 3*1024 KB = 3* 1024 * 1024
+    if size > 3 * 1024 * 1024:  # 3MB = 3*1024 KB = 3* 1024 * 1024
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
             detail="File too large",
@@ -109,7 +112,9 @@ def check_if_picture(file: UploadFile = File(...)):
 
 
 @router.put("/pic", status_code=HTTP_200_OK,
-            summary="Posts new profile picture.")
+            summary="Posts new profile picture.",
+            responses={404: {"description": "Not Found"},
+                       422: {"description": "Unprocessable File"}})
 async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -135,7 +140,8 @@ async def add_profile_pic(file: UploadFile = File(...),
 
 
 @router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission,
-            summary="Grants admin permissions to the user. **This API call was not present in first doc.**")
+            summary="Grants admin permissions to the user. **This API call was not present in first doc.**",
+            responses={404: {"description": "Profile Not Found"}})
 async def switch_admin_permission(profile: profile_schema.SwitchPermission,
                                   db: Session = Depends(create_connection),
                                   user: User = Depends(auth.get_current_user)):
@@ -168,7 +174,8 @@ async def switch_admin_permission(profile: profile_schema.SwitchPermission,
 
 
 @router.delete("/", status_code=HTTP_200_OK,
-               summary="Deletes user profile.")
+               summary="Deletes user profile.",
+               responses={404: {"description": "Profile Not Found"}})
 def delete_user_profile(db: Session = Depends(create_connection),
                         user: User = Depends(auth.get_current_user)):
     query = db.query(User).filter(User.id == user.id)
@@ -191,7 +198,8 @@ def delete_user_profile(db: Session = Depends(create_connection),
 
 
 @router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic,
-            summary="Deletes current profile picture. **This API call was marked as DELETE in first doc.**")
+            summary="Deletes current profile picture. **This API call was marked as DELETE in first doc.**",
+            responses={404: {"description": "Profile Not Found"}})
 def delete_profile_pic(db: Session = Depends(create_connection),
                        user: User = Depends(auth.get_current_user)):
     """

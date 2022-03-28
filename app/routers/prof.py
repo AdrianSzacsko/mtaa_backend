@@ -12,12 +12,14 @@ from ..security import auth
 
 router = APIRouter(
     prefix="/prof",
-    tags=["Professors"]
+    tags=["Professors"],
+    responses={401: {"description": "Unauthorized"}}
 )
 
 
 @router.get("/", response_model=List[prof_schema.GetProfId], status_code=HTTP_200_OK,
-            summary="Retrieves professor's profile.")
+            summary="Retrieves professor's profile.",
+            responses={404: {"description": "Professor Not Found"}})
 def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
              user: User = Depends(auth.get_current_user)):
@@ -51,7 +53,8 @@ def get_prof(db: Session = Depends(create_connection),
 
 
 @router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews], status_code=HTTP_200_OK,
-            summary="Retrieves reviews for specific professor.")
+            summary="Retrieves reviews for specific professor.",
+            responses={404: {"description": "Professor Not Found"}})
 def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
                      user: User = Depends(auth.get_current_user)):
@@ -99,7 +102,9 @@ def interval_exception(prof: prof_schema.PostProfId):
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
-             summary="Adds a review.")
+             summary="Adds a review.",
+             responses={404: {"description": "Professor Not Found"},
+                        400: {"description": "Bad Request"}})
 async def add_prof_review(prof: prof_schema.PostProfId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -140,7 +145,9 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 
 
 @router.put("/", status_code=HTTP_200_OK, response_model=prof_schema.PostProfIdOut,
-            summary="Modifies a review.")
+            summary="Modifies a review.",
+            responses={404: {"description": "Review Not Found"},
+                       400: {"description": "Bad Request"}})
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
