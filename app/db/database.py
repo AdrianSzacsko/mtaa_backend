@@ -4,6 +4,9 @@ from app.db import init_db
 
 
 def create_connection():
+    """
+        Creates a connection to database and returns a Session variable.
+    """
     session = sessionmaker(autocommit=False, bind=init_db.engine)
     db = session()
     try:

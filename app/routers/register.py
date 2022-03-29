@@ -60,7 +60,7 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
             detail="Incorrect password",
         )
     else:
-        user.pwd = get_password_hash(user.pwd)
+        user.pwd = get_password_hash(user.pwd)  # if the password is correct, create hash from user's password
 
     if await check_email_validity(user.email):
         raise HTTPException(
@@ -82,7 +82,7 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
     )
     """
 
-    registered_user = User(**user.dict())
+    registered_user = User(**user.dict())  # wrap json into the model object
     db.add(registered_user)
     db.commit()
     db.refresh(registered_user)

@@ -44,7 +44,7 @@ def get_search(db: Session = Depends(create_connection),
                   select concat(u.first_name, ' ', u.last_name) as name, 'USER' as code, u.id
                   from user_table u
               ) as search
-                where lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%');"""))
+                where lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%');"""))  # direct sql select into database
     data = rs.fetchall()
 
     if not data:

@@ -42,7 +42,7 @@ def get_prof(db: Session = Depends(create_connection),
 
     join_query = result.join(Relation, Professor.id == Relation.prof_id) \
         .join(Subject, Relation.subj_id == Subject.id) \
-        .filter(Professor.id == prof_id).all()
+        .filter(Professor.id == prof_id).all()  # queried result needs to be joined accordingly
 
     if len(join_query) == 0:
         raise HTTPException(
@@ -89,6 +89,9 @@ def get_prof_reviews(db: Session = Depends(create_connection),
 
 
 def interval_exception(prof: prof_schema.PostProfId):
+    """
+    This method monitors various interval conditions that need to be met for correct front-end implementation
+    """
     if len(prof.message) <= 2:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
@@ -121,7 +124,7 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 
     query = db.query(ProfessorReview).filter(and_(ProfessorReview.prof_id == prof.prof_id,
                                                   ProfessorReview.user_id == user.id))
-    query_row = query.first()
+    query_row = query.first()  # retrieve only first result
     if query_row is not None:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
@@ -136,7 +139,7 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 
     prof_review = ProfessorReview(user_id=user.id, **prof.dict())
 
-    db.add(prof_review)
+    db.add(prof_review)  # 3 essential methods that post new values into database
     db.commit()
     db.refresh(prof_review)
 

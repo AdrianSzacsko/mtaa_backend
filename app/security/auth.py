@@ -25,6 +25,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def create_access_token(data: dict, expires_delta: timedelta):
+    """
+    Creates a token with given timedelta.
+    """
     to_encode = data.copy()
 
     if expires_delta:
@@ -38,6 +41,9 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
 
 def check_token_validity(token: str = Depends(oauth2_scheme)):
+    """
+    Inspects given token and raises various exception.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -58,6 +64,9 @@ def check_token_validity(token: str = Depends(oauth2_scheme)):
 
 def get_current_user(token: str = Depends(oauth2_scheme),
                      db: Session = Depends(create_connection)):
+    """
+    Returns user's id using token and database
+    """
     token = check_token_validity(token)
     if not token:
         raise HTTPException(

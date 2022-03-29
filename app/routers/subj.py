@@ -95,6 +95,9 @@ def get_subject_reviews(db: Session = Depends(create_connection),
 
 
 def interval_exception(subj: subj_schema.PostSubjectId):
+    """
+    This method monitors various interval conditions that need to be met for correct front-end implementation
+    """
     if len(subj.message) <= 2:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
@@ -156,7 +159,7 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
 
     subj_review = SubjectReview(user_id=user.id, **subj.dict())
 
-    db.add(subj_review)
+    db.add(subj_review)  # 3 essential methods that post new values into database
     db.commit()
     db.refresh(subj_review)
 
