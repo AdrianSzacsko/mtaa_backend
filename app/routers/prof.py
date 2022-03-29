@@ -212,6 +212,11 @@ async def modify_prof_review(prof: prof_schema.PostProfId,
 def delete_user_profile(review_delete: prof_schema.DeleteProfReview,
                         db: Session = Depends(create_connection),
                         user: User = Depends(auth.get_current_user)):
+    """
+        Input parameters:
+        - **user_id**: id of the author
+        - **prof_id**: id of the reviewed professor
+    """
     query = db.query(ProfessorReview).filter(and_(ProfessorReview.user_id == review_delete.user_id,
                                                 ProfessorReview.prof_id == review_delete.prof_id))
     current_review = query.first()
