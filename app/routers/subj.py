@@ -103,19 +103,19 @@ def interval_exception(subj: subj_schema.PostSubjectId):
 
     if not 0 <= subj.prof_avg <= 100:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Rating professor average out of interval!",
         )
 
     if not 0 <= subj.difficulty <= 100:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Rating difficulty out of interval!",
         )
 
     if not 0 <= subj.usability <= 100:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Rating usability out of interval!",
         )
 
@@ -123,8 +123,7 @@ def interval_exception(subj: subj_schema.PostSubjectId):
 @router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut,
              summary="Adds a review.",
              responses={404: {"description": "Subject review not found!"},
-                        400: {"description": "Interval error"},
-                        403: {"description": "Message too short"}})
+                        403: {"description": "Interval error"}})
 async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -169,9 +168,7 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
 @router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut,
             summary="Modifies a review.",
             responses={404: {"description": "Subject review not found!"},
-                       400: {"description": "Interval error"},
-                       403: {"description": "Message too short"}}
-            )
+                       403: {"description": "Interval error"}})
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):

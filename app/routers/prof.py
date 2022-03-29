@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK
+from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_200_OK, \
+    HTTP_403_FORBIDDEN
 
 from .profile import increment_comment
 from ..schemas import prof_schema
@@ -90,13 +91,13 @@ def get_prof_reviews(db: Session = Depends(create_connection),
 def interval_exception(prof: prof_schema.PostProfId):
     if len(prof.message) <= 2:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Message too short!",
         )
 
     if not 0 <= prof.rating <= 100:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=HTTP_403_FORBIDDEN,
             detail="Rating out of interval!",
         )
 
@@ -104,7 +105,7 @@ def interval_exception(prof: prof_schema.PostProfId):
 @router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
              summary="Adds a review.",
              responses={404: {"description": "Professor Not Found"},
-                        400: {"description": "Bad Request"}})
+                        403: {"description": "Interval Error"}})
 async def add_prof_review(prof: prof_schema.PostProfId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -147,7 +148,7 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 @router.put("/", status_code=HTTP_200_OK, response_model=prof_schema.PostProfIdOut,
             summary="Modifies a review.",
             responses={404: {"description": "Review Not Found"},
-                       400: {"description": "Bad Request"}})
+                       403: {"description": "Interval Error"}})
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
