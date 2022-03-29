@@ -209,19 +209,19 @@ async def modify_prof_review(prof: prof_schema.PostProfId,
 @router.delete("/delete_review", status_code=HTTP_200_OK,
                summary="Deletes user review.",
                responses={404: {"description": "Review Not Found"}})
-def delete_user_profile(review_delete: prof_schema.DeleteProfReview,
-                        db: Session = Depends(create_connection),
-                        user: User = Depends(auth.get_current_user)):
+def delete_review(uid: int, pid: int,
+                  db: Session = Depends(create_connection),
+                  user: User = Depends(auth.get_current_user)):
     """
         Input parameters:
-        - **user_id**: id of the author
-        - **prof_id**: id of the reviewed professor
+        - **uid**: id of the author
+        - **pid**: id of the reviewed professor
     """
-    query = db.query(ProfessorReview).filter(and_(ProfessorReview.user_id == review_delete.user_id,
-                                                ProfessorReview.prof_id == review_delete.prof_id))
+    query = db.query(ProfessorReview).filter(and_(ProfessorReview.user_id == uid,
+                                                  ProfessorReview.prof_id == pid))
     current_review = query.first()
 
-    if review_delete.user_id != user.id and user.permission is False:
+    if uid != user.id and user.permission is False:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail="Permission denied",
