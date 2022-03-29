@@ -18,7 +18,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK,
+@router.get("/{subj_id}", response_model=List[subj_schema.GetSubjectId], status_code=HTTP_200_OK,
             summary="Retrieves subject's profile.",
             responses={404: {"description": "Subject review not found"}})
 def get_subject(db: Session = Depends(create_connection),

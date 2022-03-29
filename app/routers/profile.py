@@ -27,7 +27,7 @@ def increment_comment(db: Session, user: User):
     db.commit()
 
 
-@router.get("/", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
+@router.get("/{profile_id}", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
             summary="Retrieves user profile.",
             responses={404: {"description": "Profile Not Found"}})
 def get_profile(db: Session = Depends(create_connection),

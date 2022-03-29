@@ -17,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=List[prof_schema.GetProfId], status_code=HTTP_200_OK,
+@router.get("/{prof_id}", response_model=List[prof_schema.GetProfId], status_code=HTTP_200_OK,
             summary="Retrieves professor's profile.",
             responses={404: {"description": "Professor Not Found"}})
 def get_prof(db: Session = Depends(create_connection),
