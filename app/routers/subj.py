@@ -231,3 +231,29 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
     db.commit()
 
     return subj_review
+
+
+@router.delete("/delete_review", status_code=HTTP_200_OK,
+               summary="Deletes user review.",
+               responses={404: {"description": "Review Not Found"}})
+def delete_user_profile(review_delete: subj_schema.DeleteSubjectReview,
+                        db: Session = Depends(create_connection),
+                        user: User = Depends(auth.get_current_user)):
+    query = db.query(SubjectReview).filter(and_(SubjectReview.user_id == review_delete.user_id,
+                                                SubjectReview.subj_id == review_delete.subj_id))
+    current_review = query.first()
+
+    if review_delete.user_id != user.id and user.permission is False:
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="Permission denied",
+        )
+
+    if current_review is None:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND,
+            detail="Review not found!",
+        )
+
+    db.delete(current_review)
+    db.commit()

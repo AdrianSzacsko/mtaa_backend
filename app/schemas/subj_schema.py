@@ -39,3 +39,11 @@ class PostSubjectIdOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class DeleteSubjectReview(BaseModel):
+    user_id: int
+    subj_id: int
+
+    class Config:
+        orm_mode = True
