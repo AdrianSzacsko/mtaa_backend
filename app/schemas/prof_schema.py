@@ -34,3 +34,11 @@ class PostProfIdOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class DeleteProfReview(BaseModel):
+    user_id: int
+    prof_id: int
+
+    class Config:
+        orm_mode = True
