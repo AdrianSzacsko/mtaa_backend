@@ -44,6 +44,13 @@ async def check_email_validity(email: str):
              responses={403: {"description": "Incorrect credentials"}})
 async def register(user: UserRegister, db: Session = Depends(create_connection)):
     """
+        Input parameters:
+        - **email**: user's email
+        - **first_name**: user's first name
+        - **last_name**: user's last name
+        - **study_year**: current study year
+        - **pwd**: hashed password
+
         Response values:
 
         - **email**: user's email

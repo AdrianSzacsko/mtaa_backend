@@ -25,6 +25,9 @@ def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
              user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **prof_id**: professor's id
+
         Response values:
 
         - **id**: primary key representing professor
@@ -60,8 +63,10 @@ def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
                      user: User = Depends(auth.get_current_user)):
     """
-        Response values:
+        Input parameters:
+        - **prof_id**: professor's id
 
+        Response values:
         - **id**: primary key representing professor
         - **message**: text of the review itself
         - **rating**: numerical evaluation of the professor
@@ -113,11 +118,16 @@ async def add_prof_review(prof: prof_schema.PostProfId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **prof_id**: id of the reviewed professor
+
         Response values:
 
         - **message**: textual form of the review
         - **rating**: numerical value representing review
-        - **user_id**: author's id
+        - **user_id**: author's id, taken from token
         - **prof_id**: id of the reviewed professor
     """
     interval_exception(prof)
@@ -156,6 +166,11 @@ async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **prof_id**: id of the reviewed professor
+
         Response values:
 
         - **message**: textual form of the review

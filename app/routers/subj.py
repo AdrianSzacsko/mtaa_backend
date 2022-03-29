@@ -25,8 +25,10 @@ def get_subject(db: Session = Depends(create_connection),
                 subj_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
     """
-        Response values:
+        Input parameters:
+        - **subj_id**: id of the subject
 
+        Response values:
         - **id**: primary key representing subject
         - **name**: subjects's full name
         - **teachers**: list of professor's that teach this subject
@@ -62,6 +64,9 @@ def get_subject_reviews(db: Session = Depends(create_connection),
                         subj_id: Optional[int] = 0,
                         user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **subj_id**: id of the subject
+
         Response values:
 
         - **id**: primary key representing subject
@@ -131,6 +136,13 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **subj_id**: id of the reviewed subject
+
         Response values:
 
         - **message**: textual form of the review
@@ -176,6 +188,13 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
                              user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **subj_id**: id of the reviewed subject
+
         Response values:
 
         - **message**: textual form of the review

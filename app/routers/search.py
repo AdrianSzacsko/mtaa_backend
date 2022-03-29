@@ -25,6 +25,9 @@ def get_search(db: Session = Depends(create_connection),
                search_string: Optional[str] = "",
                user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **search_string**: optional, defines keyword to search for
+
         Response values:
 
         - **name**: full name of professor, user or object
