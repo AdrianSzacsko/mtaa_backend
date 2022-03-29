@@ -34,6 +34,9 @@ def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
     """
+        Input parameters:
+        - **profile_id**: identifier of the user
+
         Response values:
 
         - **id**: unique identifier
@@ -70,8 +73,10 @@ def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
     """
-        Response values:
+        Input parameters:
+        - **profile_id**: id of the user
 
+        Response values:
         - binary form of profile picture
     """
 
@@ -137,40 +142,6 @@ async def add_profile_pic(file: UploadFile = File(...),
     query.update({"photo": file_bytes})
     db.commit()
     return StreamingResponse(io.BytesIO(file_bytes), media_type=file.content_type)
-
-
-@router.put("/admin", status_code=HTTP_200_OK, response_model=profile_schema.SwitchPermission,
-            summary="Grants admin permissions to the user. **This API call was not present in first doc.**",
-            responses={404: {"description": "Profile Not Found"}})
-async def switch_admin_permission(profile: profile_schema.SwitchPermission,
-                                  db: Session = Depends(create_connection),
-                                  user: User = Depends(auth.get_current_user)):
-    """
-        Response values:
-
-        - **auth_code**: unique password that grants admin permission
-        - **permission**: boolean result
-    """
-
-    query = db.query(User).filter(User.id == user.id)
-    query_row = query.first()
-
-    if profile.auth_code != "admin1234":
-        raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
-            detail="Permission denied!"
-        )
-
-    if not query_row:
-        raise HTTPException(
-            status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found!",
-        )
-
-    query.update({"permission": profile.permission})
-    db.commit()
-    profile.auth_code = "****"
-    return profile.dict()
 
 
 @router.delete("/", status_code=HTTP_200_OK,

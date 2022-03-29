@@ -28,10 +28,14 @@ router = APIRouter(
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: Session = Depends(create_connection)):
     """
-        Response values:
-
+        Input parameters:
         - **username**: user's email
         - **password**: user's unhashed password
+
+        Response values:
+
+        - **access_token**: system generated token
+        - **token_type**: type of token
     """
 
     user = db.query(User).filter(User.email == form_data.username).first()  # queries registered user
