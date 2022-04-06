@@ -75,4 +75,9 @@ def get_current_user(token: str = Depends(oauth2_scheme),
             headers={"WWW-Authenticate": "Bearer"},
         )
     user = db.query(User).filter(User.id == token.data).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
     return user
