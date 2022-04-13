@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from starlette.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, \
     HTTP_200_OK, HTTP_403_FORBIDDEN
 
-from .profile import increment_comment
+from .profile import increment_comment, decrement_comment
 from ..schemas import subj_schema
 from ..db.database import create_connection
 from sqlalchemy.orm import Session, aliased
@@ -259,6 +259,8 @@ def delete_review(uid: int, sid: int,
             status_code=HTTP_404_NOT_FOUND,
             detail="Review not found!",
         )
+
+    decrement_comment(db, user)
 
     db.delete(current_review)
     db.commit()

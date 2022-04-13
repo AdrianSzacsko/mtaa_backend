@@ -11,7 +11,7 @@ from typing import List, Optional
 from ..models import *
 from ..security import auth
 import io
-import magic
+from PIL import Image
 
 router = APIRouter(
     prefix="/profile",
@@ -25,6 +25,14 @@ def increment_comment(db: Session, user: User):
     user_comment = user_query.first().comments
     user_query.update({"comments": user_comment + 1})
     db.commit()
+
+
+def decrement_comment(db: Session, user: User):
+    user_query = db.query(User).filter(User.id == user.id)
+    user_comment = user_query.first().comments
+    if user_comment > 0:
+        user_query.update({"comments": user_comment - 1})
+        db.commit()
 
 
 @router.get("/{profile_id}", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
@@ -94,8 +102,9 @@ def get_profile_pic(db: Session = Depends(create_connection),
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Profile picture related to id {profile_id} was not found."
         )
-    image_type = magic.from_buffer(filter_query[0], mime=True)
-    return Response(content=filter_query[0], media_type=image_type)
+    # image_type = magic.from_buffer(filter_query[0], mime=True)
+    image_type = Image.open(io.BytesIO(filter_query[0])).format.lower()
+    return Response(content=filter_query[0], media_type=f'image/{image_type}')
 
 
 def check_if_picture(file: UploadFile = File(...)):
