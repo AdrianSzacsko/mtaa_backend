@@ -18,11 +18,12 @@ router = APIRouter(
 
 async def check_email_is_taken(email: str, db: Session = Depends(create_connection)):
     try:
-        await db.query(User).filter(email == User.email)
+        email = await db.query(User).filter(email == User.email)
+        print(email)
     except (Exception,):
-        return False
+        return True
 
-    return True
+    return False
 
 
 def check_password_length(pwd: str):
