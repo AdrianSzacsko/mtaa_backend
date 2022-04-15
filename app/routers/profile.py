@@ -16,7 +16,7 @@ from PIL import Image
 router = APIRouter(
     prefix="/profile",
     tags=["Profile"],
-    responses={401: {"description": "Unauthorized"}}
+    responses={401: {"description": "Not authorized to perform this action."}}
 )
 
 
@@ -37,7 +37,7 @@ def decrement_comment(db: Session, user: User):
 
 @router.get("/{profile_id}", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
             summary="Retrieves user profile.",
-            responses={404: {"description": "Profile Not Found"}})
+            responses={404: {"description": "Profile not found."}})
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -76,7 +76,7 @@ def get_profile(db: Session = Depends(create_connection),
 
 @router.get("/{profile_id}/pic", status_code=HTTP_200_OK,
             summary="Retrieves user profile picture.",
-            responses={404: {"description": "Not Found"}})
+            responses={404: {"description": "Profile picture not found."}})
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -113,22 +113,22 @@ def check_if_picture(file: UploadFile = File(...)):
     if file.content_type not in supported_files:
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Unsupported file type!",
+            detail="Unsupported file type.",
         )
     file_bytes = file.file.read()
     size = len(file_bytes)
     if size > 3 * 1024 * 1024:  # 3MB = 3*1024 KB = 3* 1024 * 1024
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="File too large",
+            detail="Selected file is too large.",
         )
     return file_bytes
 
 
 @router.put("/pic", status_code=HTTP_200_OK,
             summary="Posts new profile picture.",
-            responses={404: {"description": "Not Found"},
-                       422: {"description": "Unprocessable File"}})
+            responses={404: {"description": "Not found."},
+                       422: {"description": "Unprocessable file."}})
 async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
                           user: User = Depends(auth.get_current_user)):
@@ -138,7 +138,7 @@ async def add_profile_pic(file: UploadFile = File(...),
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found!",
+            detail="Profile not found.",
         )
 
     if query_row.id != user.id:
@@ -155,7 +155,7 @@ async def add_profile_pic(file: UploadFile = File(...),
 
 @router.delete("/", status_code=HTTP_200_OK,
                summary="Deletes user profile.",
-               responses={404: {"description": "Profile Not Found"}})
+               responses={404: {"description": "Profile not found"}})
 def delete_user_profile(db: Session = Depends(create_connection),
                         user: User = Depends(auth.get_current_user)):
     query = db.query(User).filter(User.id == user.id)
@@ -164,7 +164,7 @@ def delete_user_profile(db: Session = Depends(create_connection),
     if current_user is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found!",
+            detail="Profile not found.",
         )
 
     if current_user.id != user.id:
@@ -179,7 +179,7 @@ def delete_user_profile(db: Session = Depends(create_connection),
 
 @router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic,
             summary="Deletes current profile picture. **This API call was marked as DELETE in first doc.**",
-            responses={404: {"description": "Profile Not Found"}})
+            responses={404: {"description": "Profile not found"}})
 def delete_profile_pic(db: Session = Depends(create_connection),
                        user: User = Depends(auth.get_current_user)):
     """
@@ -194,7 +194,7 @@ def delete_profile_pic(db: Session = Depends(create_connection),
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found!",
+            detail="Profile not found.",
         )
 
     if query_row.id != user.id:

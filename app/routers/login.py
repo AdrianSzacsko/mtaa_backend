@@ -42,13 +42,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
     if not user:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Incorrect username or password"
+            detail="Incorrect username or password."
         )
 
     if not verify_password(form_data.password, user.pwd):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Incorrect username or password"
+            detail="Incorrect username or password."
         )
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

@@ -39,7 +39,7 @@ async def check_email_validity(email: str):
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister,
              summary="Registers new user.",
-             responses={403: {"description": "Incorrect credentials"}})
+             responses={403: {"description": "Incorrect credentials."}})
 async def register(user: UserRegister, db: Session = Depends(create_connection)):
     """
         Input parameters:
@@ -62,7 +62,7 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
     if check_password_length(user.pwd):
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Incorrect password",
+            detail="Incorrect password.",
         )
     else:
         user.pwd = get_password_hash(user.pwd)  # if the password is correct, create hash from user's password
@@ -70,13 +70,13 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
     if await check_email_validity(user.email):
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Incorrect email form",
+            detail="Incorrect email form.",
         )
 
     if check_email_is_taken(user.email, db):
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Email already taken!",
+            detail="Email already taken.",
         )
 
 
