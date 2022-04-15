@@ -16,14 +16,11 @@ router = APIRouter(
 )
 
 
-async def check_email_is_taken(email: str, db: Session = Depends(create_connection)):
-    try:
-        email = await db.query(User).filter(email == User.email)
-        print(email)
-    except (Exception,):
-        return True
-
-    return False
+def check_email_is_taken(mail: str, db: Session = Depends(create_connection)):
+    retval = db.query(User).filter(User.email == mail).first()
+    if retval is None:
+        return False
+    return True
 
 
 def check_password_length(pwd: str):
@@ -76,7 +73,7 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
             detail="Incorrect email form",
         )
 
-    if await check_email_is_taken(user.email):
+    if check_email_is_taken(user.email, db):
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail="Email already taken!",
