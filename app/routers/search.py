@@ -38,16 +38,20 @@ def get_search(db: Session = Depends(create_connection),
     #search_string = '%' + search_string + '%'
     con = engine.connect()
     rs = con.execute(text(f"""select * from (
-                  select s.name as name, s.code as code, s.id
+                  (select s.name as name, s.code as code, s.id
                   from subject_table s
+                      limit case when '{search_string}' = 'default_value' then 1 end)
                   union
-                  select concat(p.first_name, ' ', p.last_name) as name, 'PROF' as code, p.id
+                  (select concat(p.first_name, ' ', p.last_name) as name, 'PROF' as code, p.id
                   from professor_table p
+                      limit case when '{search_string}' = 'default_value' then 1 end)
                   union
-                  select concat(u.first_name, ' ', u.last_name) as name, 'USER' as code, u.id
+                  (select concat(u.first_name, ' ', u.last_name) as name, 'USER' as code, u.id
                   from user_table u
+                      limit case when '{search_string}' = 'default_value' then 1 end)
               ) as search
-                where lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%');"""))  # direct sql select into database
+                where case when '{search_string}' = 'default_value' then lower(search.code) like '%'
+                    else lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%') end;"""))  # direct sql select into database
     data = rs.fetchall()
 
     if not data:
