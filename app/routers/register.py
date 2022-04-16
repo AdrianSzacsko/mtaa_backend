@@ -44,7 +44,7 @@ def check_name_length(name: str):
 
 
 def check_email_length(email: str):
-    if len(email) < 2 or len(email) > 50:
+    if len(email) < 2 or len(email) > 40:
         return True
     return False
 
