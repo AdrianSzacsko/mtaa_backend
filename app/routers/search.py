@@ -15,7 +15,7 @@ router = APIRouter(
     prefix="/search",
     tags=["Search"],
     responses={401: {"description": "Not authorized to perform this action."},
-               404: {"description": "Not found."}}
+               404: {"description": "There was an error querying desired data."}}
 )
 
 

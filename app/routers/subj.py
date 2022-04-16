@@ -50,7 +50,7 @@ def get_subject(db: Session = Depends(create_connection),
     if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Subject review with id:{subj_id} was not found."
+            detail=f"Subject was not found."
         )
 
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
@@ -93,7 +93,7 @@ def get_subject_reviews(db: Session = Depends(create_connection),
     if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Subject review with id:{subj_id} was not found."
+            detail=f"Subject review was not found."
         )
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
@@ -106,31 +106,31 @@ def interval_exception(subj: subj_schema.PostSubjectId):
     if len(subj.message) <= 2:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Message too short.",
+            detail="Review is too short.",
         )
 
     if not 0 <= subj.prof_avg <= 100:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Rating professor average out of interval.",
+            detail="Rating professor average is out of interval.",
         )
 
     if not 0 <= subj.difficulty <= 100:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Difficulty out of interval.",
+            detail="Difficulty is out of interval.",
         )
 
     if not 0 <= subj.usability <= 100:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Usability out of interval.",
+            detail="Usability is out of interval.",
         )
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=subj_schema.PostSubjectIdOut,
              summary="Adds a review.",
-             responses={404: {"description": "Subject review not found."},
+             responses={404: {"description": "Subject review was not found."},
                         403: {"description": "Interval is out of range."}})
 async def add_subj_review(subj: subj_schema.PostSubjectId,
                           db: Session = Depends(create_connection),
@@ -160,13 +160,13 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
     if query.first() is not None:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
-            detail="Review already exists, for modification use PUT.",
+            detail="Review already exists, modify your existing one.",
         )
 
     if len(db.query(Subject).filter(Subject.id == subj.subj_id).all()) == 0:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Subject not found.",
+            detail="Subject was not found.",
         )
 
     subj_review = SubjectReview(user_id=user.id, **subj.dict())
@@ -182,7 +182,7 @@ async def add_subj_review(subj: subj_schema.PostSubjectId,
 
 @router.put("/", status_code=HTTP_200_OK, response_model=subj_schema.PostSubjectIdOut,
             summary="Modifies a review.",
-            responses={404: {"description": "Subject review not found."},
+            responses={404: {"description": "Subject review was not found."},
                        403: {"description": "Interval is out of range."}})
 async def modify_subj_review(subj: subj_schema.PostSubjectId,
                              db: Session = Depends(create_connection),
@@ -216,13 +216,13 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Review not found.",
+            detail="Review was not found.",
         )
 
     if query_row.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized to perform this action."
+            detail="Not authorized to perform this action."
         )
 
     updated_review = subj_schema.PostSubjectIdOut(user_id=user.id, **subj.dict())
@@ -235,7 +235,7 @@ async def modify_subj_review(subj: subj_schema.PostSubjectId,
 
 @router.delete("/delete_review", status_code=HTTP_200_OK,
                summary="Deletes user review.",
-               responses={404: {"description": "Review not found."}})
+               responses={404: {"description": "Review was not found."}})
 def delete_review(uid: int, sid: int,
                   db: Session = Depends(create_connection),
                   user: User = Depends(auth.get_current_user)):
@@ -257,7 +257,7 @@ def delete_review(uid: int, sid: int,
     if current_review is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Review not found.",
+            detail="Review was not found.",
         )
 
     decrement_comment(db, user)

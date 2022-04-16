@@ -14,13 +14,13 @@ from ..security import auth
 router = APIRouter(
     prefix="/prof",
     tags=["Professors"],
-    responses={401: {"description": "Unauthorized"}}
+    responses={401: {"description": "Not authorized to perform this action."}}
 )
 
 
 @router.get("/{prof_id}", response_model=List[prof_schema.GetProfId], status_code=HTTP_200_OK,
             summary="Retrieves professor's profile.",
-            responses={404: {"description": "Professor not found."}})
+            responses={404: {"description": "Professor was not found."}})
 def get_prof(db: Session = Depends(create_connection),
              prof_id: Optional[int] = 0,
              user: User = Depends(auth.get_current_user)):
@@ -50,7 +50,7 @@ def get_prof(db: Session = Depends(create_connection),
     if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Professor with ID {prof_id} was not found."
+            detail=f"Professor was not found."
         )
 
     return join_query
@@ -58,7 +58,7 @@ def get_prof(db: Session = Depends(create_connection),
 
 @router.get("/{prof_id}/reviews", response_model=List[prof_schema.GetProfIdReviews], status_code=HTTP_200_OK,
             summary="Retrieves reviews for specific professor.",
-            responses={404: {"description": "Professor not found."}})
+            responses={404: {"description": "Professor review was not found."}})
 def get_prof_reviews(db: Session = Depends(create_connection),
                      prof_id: Optional[int] = 0,
                      user: User = Depends(auth.get_current_user)):
@@ -87,7 +87,7 @@ def get_prof_reviews(db: Session = Depends(create_connection),
     if len(join_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Professor review with id:{prof_id} was not found."
+            detail=f"Professor review was not found."
         )
     # result = db.query(Subject).filter(Subject.id == {subj_id}).all()
     return join_query
@@ -100,19 +100,19 @@ def interval_exception(prof: prof_schema.PostProfId):
     if len(prof.message) <= 2:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Message too short.",
+            detail="Review is too short.",
         )
 
     if not 0 <= prof.rating <= 100:
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
-            detail="Rating out of interval.",
+            detail="Rating is out of interval.",
         )
 
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=prof_schema.PostProfIdOut,
              summary="Adds a review.",
-             responses={404: {"description": "Professor not found."},
+             responses={404: {"description": "Professor was not found."},
                         403: {"description": "Interval is out of range."}})
 async def add_prof_review(prof: prof_schema.PostProfId,
                           db: Session = Depends(create_connection),
@@ -138,13 +138,13 @@ async def add_prof_review(prof: prof_schema.PostProfId,
     if query_row is not None:
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
-            detail="Review already exists, for modification use PUT.",
+            detail="Review already exists, modify your existing one.",
         )
 
     if len(db.query(Professor).filter(Professor.id == prof.prof_id).all()) == 0:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Professor not found.",
+            detail="Professor was not found.",
         )
 
     prof_review = ProfessorReview(user_id=user.id, **prof.dict())
@@ -160,7 +160,7 @@ async def add_prof_review(prof: prof_schema.PostProfId,
 
 @router.put("/", status_code=HTTP_200_OK, response_model=prof_schema.PostProfIdOut,
             summary="Modifies a review.",
-            responses={404: {"description": "Review not found."},
+            responses={404: {"description": "Review was not found."},
                        403: {"description": "Interval is out of range."}})
 async def modify_prof_review(prof: prof_schema.PostProfId,
                              db: Session = Depends(create_connection),
@@ -190,13 +190,13 @@ async def modify_prof_review(prof: prof_schema.PostProfId,
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Review not found.",
+            detail="Review was not found.",
         )
 
     if query_row.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized to perform this action."
+            detail="Not authorized to perform this action."
         )
 
     updated_review = prof_schema.PostProfIdOut(user_id=user.id, **prof.dict())
@@ -208,7 +208,7 @@ async def modify_prof_review(prof: prof_schema.PostProfId,
 
 @router.delete("/delete_review", status_code=HTTP_200_OK,
                summary="Deletes user review.",
-               responses={404: {"description": "Review not found."}})
+               responses={404: {"description": "Review was not found."}})
 def delete_review(uid: int, pid: int,
                   db: Session = Depends(create_connection),
                   user: User = Depends(auth.get_current_user)):
@@ -230,7 +230,7 @@ def delete_review(uid: int, pid: int,
     if current_review is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Review not found.",
+            detail="Review was not found.",
         )
     decrement_comment(db, user)
 

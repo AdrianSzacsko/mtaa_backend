@@ -57,7 +57,7 @@ def check_study_year(study_year: int):
 
 @router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister,
              summary="Registers new user.",
-             responses={403: {"description": "Incorrect credentials."}})
+             responses={403: {"description": "Invalid credentials."}})
 async def register(user: UserRegister, db: Session = Depends(create_connection)):
     """
         Input parameters:
@@ -120,7 +120,6 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
             status_code=HTTP_403_FORBIDDEN,
             detail="Invalid study year.",
         )
-
 
     """
     raise HTTPException(

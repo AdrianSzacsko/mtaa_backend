@@ -37,7 +37,7 @@ def decrement_comment(db: Session, user: User):
 
 @router.get("/{profile_id}", response_model=List[profile_schema.GetProfileId], status_code=HTTP_200_OK,
             summary="Retrieves user profile.",
-            responses={404: {"description": "Profile not found."}})
+            responses={404: {"description": "Profile was not found."}})
 def get_profile(db: Session = Depends(create_connection),
                 profile_id: Optional[int] = 0,
                 user: User = Depends(auth.get_current_user)):
@@ -69,14 +69,14 @@ def get_profile(db: Session = Depends(create_connection),
     if len(filter_query) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Profile with {profile_id} was not found."
+            detail=f"Profile was not found."
         )
     return filter_query
 
 
 @router.get("/{profile_id}/pic", status_code=HTTP_200_OK,
             summary="Retrieves user profile picture.",
-            responses={404: {"description": "Profile picture not found."}})
+            responses={404: {"description": "Profile picture was not found."}})
 def get_profile_pic(db: Session = Depends(create_connection),
                     profile_id: Optional[int] = 0,
                     user: User = Depends(auth.get_current_user)):
@@ -94,13 +94,13 @@ def get_profile_pic(db: Session = Depends(create_connection),
     if filter_query is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Profile related to id {profile_id} was not found."
+            detail=f"Profile was not found."
         )
 
     if filter_query[0] is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Profile picture related to id {profile_id} was not found."
+            detail=f"Profile picture was not found."
         )
     # image_type = magic.from_buffer(filter_query[0], mime=True)
     image_type = Image.open(io.BytesIO(filter_query[0])).format.lower()
@@ -127,7 +127,7 @@ def check_if_picture(file: UploadFile = File(...)):
 
 @router.put("/pic", status_code=HTTP_200_OK,
             summary="Posts new profile picture.",
-            responses={404: {"description": "Not found."},
+            responses={404: {"description": "Profile was not found."},
                        422: {"description": "Unprocessable file."}})
 async def add_profile_pic(file: UploadFile = File(...),
                           db: Session = Depends(create_connection),
@@ -138,13 +138,13 @@ async def add_profile_pic(file: UploadFile = File(...),
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found.",
+            detail="Profile was not found.",
         )
 
     if query_row.id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized to perform this action."
+            detail="Not authorized to perform this action."
         )
 
     file_bytes = check_if_picture(file)
@@ -155,7 +155,7 @@ async def add_profile_pic(file: UploadFile = File(...),
 
 @router.delete("/", status_code=HTTP_200_OK,
                summary="Deletes user profile.",
-               responses={404: {"description": "Profile not found"}})
+               responses={404: {"description": "Profile was not found"}})
 def delete_user_profile(db: Session = Depends(create_connection),
                         user: User = Depends(auth.get_current_user)):
     query = db.query(User).filter(User.id == user.id)
@@ -164,13 +164,13 @@ def delete_user_profile(db: Session = Depends(create_connection),
     if current_user is None:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found.",
+            detail="Profile was not found.",
         )
 
     if current_user.id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized to perform this action."
+            detail="Not authorized to perform this action."
         )
 
     db.delete(current_user)
@@ -179,7 +179,7 @@ def delete_user_profile(db: Session = Depends(create_connection),
 
 @router.put("/delete_pic", status_code=HTTP_200_OK, response_model=profile_schema.PutProfilePic,
             summary="Deletes current profile picture. **This API call was marked as DELETE in first doc.**",
-            responses={404: {"description": "Profile not found"}})
+            responses={404: {"description": "Profile was not found"}})
 def delete_profile_pic(db: Session = Depends(create_connection),
                        user: User = Depends(auth.get_current_user)):
     """
@@ -194,13 +194,13 @@ def delete_profile_pic(db: Session = Depends(create_connection),
     if not query_row:
         raise HTTPException(
             status_code=HTTP_404_NOT_FOUND,
-            detail="Profile not found.",
+            detail="Profile was not found.",
         )
 
     if query_row.id != user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized to perform this action."
+            detail="Not authorized to perform this action."
         )
 
     query.update({"photo": None})
