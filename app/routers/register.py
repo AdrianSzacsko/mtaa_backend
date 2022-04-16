@@ -43,6 +43,12 @@ def check_name_length(name: str):
     return False
 
 
+def check_email_length(email: str):
+    if len(email) < 2 or len(email) > 50:
+        return True
+    return False
+
+
 def check_study_year(study_year: int):
     if study_year < 0 or study_year > 10:
         return True
@@ -101,6 +107,12 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail="Last name has invalid length.",
+        )
+
+    if check_email_length(user.email):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="Email has invalid length.",
         )
 
     if check_study_year(user.study_year):
