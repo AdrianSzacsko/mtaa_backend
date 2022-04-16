@@ -37,6 +37,18 @@ async def check_email_validity(email: str):
     return True
 
 
+def check_name_length(name: str):
+    if len(name) < 2 or len(name) > 20:
+        return True
+    return False
+
+
+def check_study_year(study_year: int):
+    if study_year < 0 or study_year > 10:
+        return True
+    return False
+
+
 @router.post("/", status_code=HTTP_201_CREATED, response_model=PostRegister,
              summary="Registers new user.",
              responses={403: {"description": "Incorrect credentials."}})
@@ -77,6 +89,24 @@ async def register(user: UserRegister, db: Session = Depends(create_connection))
         raise HTTPException(
             status_code=HTTP_403_FORBIDDEN,
             detail="Email already taken.",
+        )
+
+    if check_name_length(user.first_name):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="First name has invalid length.",
+        )
+
+    if check_name_length(user.last_name):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="Last name has invalid length.",
+        )
+
+    if check_study_year(user.study_year):
+        raise HTTPException(
+            status_code=HTTP_403_FORBIDDEN,
+            detail="Invalid study year.",
         )
 
 
