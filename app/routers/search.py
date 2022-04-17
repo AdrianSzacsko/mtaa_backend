@@ -37,21 +37,35 @@ def get_search(db: Session = Depends(create_connection),
 
     #search_string = '%' + search_string + '%'
     con = engine.connect()
-    rs = con.execute(text(f"""select * from (
-                  (select s.name as name, s.code as code, s.id
-                  from subject_table s
-                      limit case when '{search_string}' = 'default_value' then 1 end)
-                  union
-                  (select concat(p.first_name, ' ', p.last_name) as name, 'PROF' as code, p.id
-                  from professor_table p
-                      limit case when '{search_string}' = 'default_value' then 1 end)
-                  union
-                  (select concat(u.first_name, ' ', u.last_name) as name, 'USER' as code, u.id
-                  from user_table u
-                      limit case when '{search_string}' = 'default_value' then 1 end)
-              ) as search
-                where case when '{search_string}' = 'default_value' then lower(search.code) like '%'
-                    else lower(search.name) like lower('%{search_string}%') or lower(search.code) like lower('%{search_string}%') end;"""))  # direct sql select into database
+    rs = con.execute(text(f"""select name, code, id from (
+                               select *,
+                                      row_number() over (partition by pointer) as rn
+                               from (
+                                        select *
+                                        from (
+                                                 (select s.name as name, s.code as code, s.id, 'subj' as pointer
+                                                  from subject_table s)
+                                                 union
+                                                 (select concat(p.first_name, ' ', p.last_name) as name,
+                                                         'PROF'                                 as code,
+                                                         p.id,
+                                                         'prof'                                 as pointer
+                                                  from professor_table p)
+                                                 union
+                                                 (select concat(u.first_name, ' ', u.last_name) as name,
+                                                         'USER'                                 as code,
+                                                         u.id,
+                                                         'user'                                 as pointer
+                                                  from user_table u)
+                                             ) as search
+                                        where case
+                                                  when '{search_string}' = 'default_value'
+                                                      then lower(search.code) like '%'
+                                                  else lower(search.name) like lower('%{search_string}%') or
+                                                       lower(search.code) like lower('%{search_string}%') end
+                                    ) as tmp
+                               order by rn, pointer
+                           ) as tmp2;"""))  # direct sql select into database
     data = rs.fetchall()
 
     if not data:
