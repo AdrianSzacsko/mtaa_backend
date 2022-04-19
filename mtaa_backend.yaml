@@ -1,0 +1,1163 @@
+openapi: 3.0.2
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  /prof/{prof_id}:
+    get:
+      tags:
+        - Professors
+      summary: Retrieves professor's profile.
+      description: |-
+        Input parameters:
+        - **prof_id**: professor's id
+
+        Response values:
+
+        - **id**: primary key representing professor
+        - **name**: professor's full name
+        - **subj_id**: id of a subject, that the professor teaches
+        - **subj_name**: full name according to the subj_id
+        - **code**: short form of the subj_name, typically an acronym
+      operationId: get_prof_prof__prof_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Prof Id
+            type: integer
+          name: prof_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Prof Prof  Prof Id  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetProfId'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Professor was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /prof/{prof_id}/reviews:
+    get:
+      tags:
+        - Professors
+      summary: Retrieves reviews for specific professor.
+      description: |-
+        Input parameters:
+        - **prof_id**: professor's id
+
+        Response values:
+        - **id**: primary key representing professor
+        - **message**: text of the review itself
+        - **rating**: numerical evaluation of the professor
+        - **user_id**: author of the review
+        - **user_name**: full name of the author
+      operationId: get_prof_reviews_prof__prof_id__reviews_get
+      parameters:
+        - required: true
+          schema:
+            title: Prof Id
+            type: integer
+          name: prof_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Prof Reviews Prof  Prof Id  Reviews Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetProfIdReviews'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Professor review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /prof/:
+    put:
+      tags:
+        - Professors
+      summary: Modifies a review.
+      description: |-
+        Input parameters:
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **prof_id**: id of the reviewed professor
+
+        Response values:
+
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **user_id**: author's id
+        - **prof_id**: id of the reviewed professor
+      operationId: modify_prof_review_prof__put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostProfId'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostProfIdOut'
+        '401':
+          description: Not authorized to perform this action.
+        '403':
+          description: Interval is out of range.
+        '404':
+          description: Review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+    post:
+      tags:
+        - Professors
+      summary: Adds a review.
+      description: |-
+        Input parameters:
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **prof_id**: id of the reviewed professor
+
+        Response values:
+
+        - **message**: textual form of the review
+        - **rating**: numerical value representing review
+        - **user_id**: author's id, taken from token
+        - **prof_id**: id of the reviewed professor
+      operationId: add_prof_review_prof__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostProfId'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostProfIdOut'
+        '401':
+          description: Not authorized to perform this action.
+        '403':
+          description: Interval is out of range.
+        '404':
+          description: Professor was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /prof/delete_review:
+    delete:
+      tags:
+        - Professors
+      summary: Deletes user review.
+      description: |-
+        Input parameters:
+        - **uid**: id of the author
+        - **pid**: id of the reviewed professor
+      operationId: delete_review_prof_delete_review_delete
+      parameters:
+        - required: true
+          schema:
+            title: Uid
+            type: integer
+          name: uid
+          in: query
+        - required: true
+          schema:
+            title: Pid
+            type: integer
+          name: pid
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /subj/{subj_id}:
+    get:
+      tags:
+        - Subjects
+      summary: Retrieves subject's profile.
+      description: |-
+        Input parameters:
+        - **subj_id**: id of the subject
+
+        Response values:
+        - **id**: primary key representing subject
+        - **name**: subjects's full name
+        - **teachers**: list of professor's that teach this subject
+        - **garant**: boss of this subject
+      operationId: get_subject_subj__subj_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Subj Id
+            type: integer
+          name: subj_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Subject Subj  Subj Id  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetSubjectId'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Subject review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /subj/{subj_id}/reviews:
+    get:
+      tags:
+        - Subjects
+      summary: Retrieves reviews for specific subject.
+      description: |-
+        Input parameters:
+        - **subj_id**: id of the subject
+
+        Response values:
+
+        - **id**: primary key representing subject
+        - **message**: text of the review itself
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_name**: full name of the author
+        - **user_id**: author's id
+      operationId: get_subject_reviews_subj__subj_id__reviews_get
+      parameters:
+        - required: true
+          schema:
+            title: Subj Id
+            type: integer
+          name: subj_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Subject Reviews Subj  Subj Id  Reviews Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetSubjectIdReviews'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Subject review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /subj/:
+    put:
+      tags:
+        - Subjects
+      summary: Modifies a review.
+      description: |-
+        Input parameters:
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **subj_id**: id of the reviewed subject
+
+        Response values:
+
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_id**: author's id
+        - **subj_id**: id of the reviewed subject
+      operationId: modify_subj_review_subj__put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSubjectId'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostSubjectIdOut'
+        '401':
+          description: Not authorized to perform this action.
+        '403':
+          description: Interval is out of range.
+        '404':
+          description: Subject review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+    post:
+      tags:
+        - Subjects
+      summary: Adds a review.
+      description: |-
+        Input parameters:
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **subj_id**: id of the reviewed subject
+
+        Response values:
+
+        - **message**: textual form of the review
+        - **prof_avg**: numerical evaluation of the professors
+        - **usability**: numerical evaluation of how usable is this subject
+        - **difficulty**: author of the review
+        - **user_id**: author's id
+        - **subj_id**: id of the reviewed subject
+      operationId: add_subj_review_subj__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSubjectId'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostSubjectIdOut'
+        '401':
+          description: Not authorized to perform this action.
+        '403':
+          description: Interval is out of range.
+        '404':
+          description: Subject review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /subj/delete_review:
+    delete:
+      tags:
+        - Subjects
+      summary: Deletes user review.
+      description: |-
+        Input parameters:
+        - **uid**: id of the author
+        - **sid**: id of the reviewed subject
+      operationId: delete_review_subj_delete_review_delete
+      parameters:
+        - required: true
+          schema:
+            title: Uid
+            type: integer
+          name: uid
+          in: query
+        - required: true
+          schema:
+            title: Sid
+            type: integer
+          name: sid
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Review was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /login/:
+    post:
+      tags:
+        - Login
+      summary: Simple login form with password verification and token creation.
+      description: |-
+        Input parameters:
+        - **username**: user's email
+        - **password**: user's unhashed password
+
+        Response values:
+
+        - **access_token**: system generated token
+        - **token_type**: type of token
+      operationId: login_login__post
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Body_login_login__post'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '403':
+          description: Incorrect credentials.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /register/:
+    post:
+      tags:
+        - Register
+      summary: Registers new user.
+      description: |-
+        Input parameters:
+        - **email**: user's email
+        - **first_name**: user's first name
+        - **last_name**: user's last name
+        - **study_year**: current study year
+        - **pwd**: hashed password
+
+        Response values:
+
+        - **email**: user's email
+        - **first_name**: user's first name
+        - **last_name**: user's last name
+        - **permission**: default false
+        - **study_year**: current study year
+        - **pwd**: hashed password
+      operationId: register_register__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostRegister'
+        '403':
+          description: Invalid credentials.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /search/:
+    get:
+      tags:
+        - Search
+      summary: Looks up any profile.
+      description: |-
+        Input parameters:
+        - **search_string**: optional, defines keyword to search for
+
+        Response values:
+
+        - **name**: full name of professor, user or object
+        - **code**: shortcut for name
+        - **id**: unique identifier for given entity
+      operationId: get_search_search__get
+      parameters:
+        - required: false
+          schema:
+            title: Search String
+            type: string
+            default: ''
+          name: search_string
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Search Search  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetSearch'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: There was an error querying desired data.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /profile/{profile_id}:
+    get:
+      tags:
+        - Profile
+      summary: Retrieves user profile.
+      description: |-
+        Input parameters:
+        - **profile_id**: identifier of the user
+
+        Response values:
+
+        - **id**: unique identifier
+        - **email**: unique email, also serves as username
+        - **name**: user's real name
+        - **permission**: whether admin permission is granted
+        - **comments**: number of posted reviews
+        - **reg_date**: registration date
+        - **study_year**: current year of study
+      operationId: get_profile_profile__profile_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Profile Id
+            type: integer
+          name: profile_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                title: Response Get Profile Profile  Profile Id  Get
+                type: array
+                items:
+                  $ref: '#/components/schemas/GetProfileId'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Profile was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /profile/{profile_id}/pic:
+    get:
+      tags:
+        - Profile
+      summary: Retrieves user profile picture.
+      description: |-
+        Input parameters:
+        - **profile_id**: id of the user
+
+        Response values:
+        - binary form of profile picture
+      operationId: get_profile_pic_profile__profile_id__pic_get
+      parameters:
+        - required: true
+          schema:
+            title: Profile Id
+            type: integer
+          name: profile_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Profile picture was not found.
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - OAuth2PasswordBearer: []
+  /profile/pic:
+    put:
+      tags:
+        - Profile
+      summary: Posts new profile picture.
+      operationId: add_profile_pic_profile_pic_put
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Body_add_profile_pic_profile_pic_put'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Profile was not found.
+        '422':
+          description: Unprocessable file.
+      security:
+        - OAuth2PasswordBearer: []
+  /profile/:
+    delete:
+      tags:
+        - Profile
+      summary: Deletes user profile.
+      operationId: delete_user_profile_profile__delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Profile was not found
+      security:
+        - OAuth2PasswordBearer: []
+  /profile/delete_pic:
+    put:
+      tags:
+        - Profile
+      summary: >-
+        Deletes current profile picture. **This API call was marked as DELETE in
+        first doc.**
+      description: |-
+        Response values:
+
+        - **photo**: empty photo value
+      operationId: delete_profile_pic_profile_delete_pic_put
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PutProfilePic'
+        '401':
+          description: Not authorized to perform this action.
+        '404':
+          description: Profile was not found
+      security:
+        - OAuth2PasswordBearer: []
+  /:
+    get:
+      summary: Root
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+components:
+  schemas:
+    Body_add_profile_pic_profile_pic_put:
+      title: Body_add_profile_pic_profile_pic_put
+      required:
+        - file
+      type: object
+      properties:
+        file:
+          title: File
+          type: string
+          format: binary
+    Body_login_login__post:
+      title: Body_login_login__post
+      required:
+        - username
+        - password
+      type: object
+      properties:
+        grant_type:
+          title: Grant Type
+          pattern: password
+          type: string
+        username:
+          title: Username
+          type: string
+        password:
+          title: Password
+          type: string
+        scope:
+          title: Scope
+          type: string
+          default: ''
+        client_id:
+          title: Client Id
+          type: string
+        client_secret:
+          title: Client Secret
+          type: string
+    GetProfId:
+      title: GetProfId
+      required:
+        - id
+        - name
+        - subj_id
+        - subj_name
+        - code
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        name:
+          title: Name
+          type: string
+        subj_id:
+          title: Subj Id
+          type: integer
+        subj_name:
+          title: Subj Name
+          type: string
+        code:
+          title: Code
+          type: string
+    GetProfIdReviews:
+      title: GetProfIdReviews
+      required:
+        - id
+        - message
+        - rating
+        - user_id
+        - user_name
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        message:
+          title: Message
+          type: string
+        rating:
+          title: Rating
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+        user_name:
+          title: User Name
+          type: string
+    GetProfileId:
+      title: GetProfileId
+      required:
+        - id
+        - email
+        - name
+        - permission
+        - comments
+        - reg_date
+        - study_year
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        email:
+          title: Email
+          type: string
+        name:
+          title: Name
+          type: string
+        permission:
+          title: Permission
+          type: boolean
+        comments:
+          title: Comments
+          type: integer
+        reg_date:
+          title: Reg Date
+          type: string
+          format: date
+        study_year:
+          title: Study Year
+          type: integer
+    GetSearch:
+      title: GetSearch
+      required:
+        - name
+        - code
+        - id
+      type: object
+      properties:
+        name:
+          title: Name
+          type: string
+        code:
+          title: Code
+          type: string
+        id:
+          title: Id
+          type: integer
+    GetSubjectId:
+      title: GetSubjectId
+      required:
+        - id
+        - name
+        - teachers
+        - garant
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        name:
+          title: Name
+          type: string
+        teachers:
+          title: Teachers
+          type: string
+        garant:
+          title: Garant
+          type: string
+    GetSubjectIdReviews:
+      title: GetSubjectIdReviews
+      required:
+        - id
+        - message
+        - prof_avg
+        - usability
+        - difficulty
+        - user_name
+        - user_id
+      type: object
+      properties:
+        id:
+          title: Id
+          type: integer
+        message:
+          title: Message
+          type: string
+        prof_avg:
+          title: Prof Avg
+          type: integer
+        usability:
+          title: Usability
+          type: integer
+        difficulty:
+          title: Difficulty
+          type: integer
+        user_name:
+          title: User Name
+          type: string
+        user_id:
+          title: User Id
+          type: integer
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    PostProfId:
+      title: PostProfId
+      required:
+        - message
+        - rating
+        - prof_id
+      type: object
+      properties:
+        message:
+          title: Message
+          type: string
+        rating:
+          title: Rating
+          type: integer
+        prof_id:
+          title: Prof Id
+          type: integer
+    PostProfIdOut:
+      title: PostProfIdOut
+      required:
+        - message
+        - rating
+        - user_id
+        - prof_id
+      type: object
+      properties:
+        message:
+          title: Message
+          type: string
+        rating:
+          title: Rating
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+        prof_id:
+          title: Prof Id
+          type: integer
+    PostRegister:
+      title: PostRegister
+      required:
+        - email
+        - first_name
+        - last_name
+        - permission
+        - study_year
+        - pwd
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+        first_name:
+          title: First Name
+          type: string
+        last_name:
+          title: Last Name
+          type: string
+        permission:
+          title: Permission
+          type: boolean
+        study_year:
+          title: Study Year
+          type: integer
+        pwd:
+          title: Pwd
+          type: string
+    PostSubjectId:
+      title: PostSubjectId
+      required:
+        - message
+        - difficulty
+        - usability
+        - prof_avg
+        - subj_id
+      type: object
+      properties:
+        message:
+          title: Message
+          type: string
+        difficulty:
+          title: Difficulty
+          type: integer
+        usability:
+          title: Usability
+          type: integer
+        prof_avg:
+          title: Prof Avg
+          type: integer
+        subj_id:
+          title: Subj Id
+          type: integer
+    PostSubjectIdOut:
+      title: PostSubjectIdOut
+      required:
+        - message
+        - difficulty
+        - usability
+        - prof_avg
+        - user_id
+        - subj_id
+      type: object
+      properties:
+        message:
+          title: Message
+          type: string
+        difficulty:
+          title: Difficulty
+          type: integer
+        usability:
+          title: Usability
+          type: integer
+        prof_avg:
+          title: Prof Avg
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+        subj_id:
+          title: Subj Id
+          type: integer
+    PutProfilePic:
+      title: PutProfilePic
+      type: object
+      properties:
+        photo:
+          title: Photo
+          type: string
+          format: binary
+    Token:
+      title: Token
+      required:
+        - access_token
+        - token_type
+      type: object
+      properties:
+        access_token:
+          title: Access Token
+          type: string
+        token_type:
+          title: Token Type
+          type: string
+    UserRegister:
+      title: UserRegister
+      required:
+        - email
+        - first_name
+        - last_name
+        - study_year
+        - pwd
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+        first_name:
+          title: First Name
+          type: string
+        last_name:
+          title: Last Name
+          type: string
+        study_year:
+          title: Study Year
+          type: integer
+        pwd:
+          title: Pwd
+          type: string
+    ValidationError:
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      type: object
+      properties:
+        loc:
+          title: Location
+          type: array
+          items:
+            type: string
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+  securitySchemes:
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: login
+tags:
+  - name: Professors
+    description: >-
+      Operations with professors within application. Includes writing and
+      modifying reviews concerning professors.
+  - name: Subjects
+    description: >-
+      Operations with subjects within application. Includes writing and
+      modifying reviews concerning subjects.
+  - name: Login
+    description: Login form.
+    externalDocs:
+      description: 'Source: '
+      url: https://fastapi.tiangolo.com/
+  - name: Register
+    description: Register form.
+    externalDocs:
+      description: 'Source: '
+      url: https://fastapi.tiangolo.com/
+  - name: Search
+    description: Simple search mechanism that can look up any profile within application
+  - name: Profile
+    description: All endpoints related to user profiles.
