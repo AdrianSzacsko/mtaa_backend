@@ -1,5 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, status, WebSocket
+from starlette.responses import JSONResponse
 from starlette.status import HTTP_200_OK
+from starlette.websockets import WebSocketDisconnect
 
 from ..schemas import search_schema
 from ..db.database import create_connection
@@ -35,7 +39,7 @@ def get_search(db: Session = Depends(create_connection),
         - **id**: unique identifier for given entity
     """
 
-    #search_string = '%' + search_string + '%'
+    # search_string = '%' + search_string + '%'
     con = engine.connect()
     rs = con.execute(text(f"""select name, code, id from (
                                select *,
@@ -75,17 +79,62 @@ def get_search(db: Session = Depends(create_connection),
         )
     return data
 
-    """if search_string == '':
-        pass
-    else:
 
-        sub = (select([Subject.name, Subject.code, Subject.id])).as_scalar()
-        prof = (select([func.concat(Professor.first_name, ' ', Professor.last_name).label('name'),
-                        text("PROF").label('code'), Professor.id])).as_scalar()
-        user = (select([func.concat(User.first_name, ' ', User.last_name).label('name'),
-                        alias(text("USER"), name='code'), User.id])).as_scalar()
+@router.websocket("/wb")
+async def get_search_wb(websocket: WebSocket):
+    """
+        Input parameters:
+        - **search_string**: optional, defines keyword to search for
 
-        unioned = sub.union(prof).union(user)
-        results = db.query(unioned).filter(or_(unioned.name.like(f'%{search_string}%'),
-                                               unioned.code.like(f'%{search_string}%')))
-        """
+        Response values:
+
+        - **name**: full name of professor, user or object
+        - **code**: shortcut for name
+        - **id**: unique identifier for given entity
+    """
+    await websocket.accept()
+    con = engine.connect()
+    try:
+        while True:
+            search_string = await websocket.receive_text()
+        # search_string = '%' + search_string + '%'
+            rs = con.execute(text(f"""select name, code, id from (
+                                       select *,
+                                              row_number() over (partition by pointer) as rn
+                                       from (
+                                                select *
+                                                from (
+                                                         (select s.name as name, s.code as code, s.id, 'subj' as pointer
+                                                          from subject_table s)
+                                                         union
+                                                         (select concat(p.first_name, ' ', p.last_name) as name,
+                                                                 'PROF'                                 as code,
+                                                                 p.id,
+                                                                 'prof'                                 as pointer
+                                                          from professor_table p)
+                                                         union
+                                                         (select concat(u.first_name, ' ', u.last_name) as name,
+                                                                 'USER'                                 as code,
+                                                                 u.id,
+                                                                 'user'                                 as pointer
+                                                          from user_table u)
+                                                     ) as search
+                                                where case
+                                                          when '{search_string}' = 'default_value'
+                                                              then lower(search.code) like '%'
+                                                          else lower(search.name) like lower('%{search_string}%') or
+                                                               lower(search.code) like lower('%{search_string}%') end
+                                            ) as tmp
+                                       order by rn, pointer
+                                   ) as tmp2;"""))  # direct sql select into database
+            data = rs.fetchall()
+
+            if not data:
+                await websocket.send_json(JSONResponse(content={"message": "There was an error querying desired data."}, status_code=404))
+            else:
+                items = []
+                for row in data:
+                    items.append({"name": row[0], "code": row[1], "id": row[2]})
+                await websocket.send_json(json.dumps(items, indent=2))
+    except WebSocketDisconnect:
+        print("disconnect from websocket")
