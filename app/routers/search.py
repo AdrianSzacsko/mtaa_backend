@@ -81,13 +81,9 @@ def get_search(db: Session = Depends(create_connection),
 
 
 @router.websocket("/wb")
-async def get_search_wb(websocket: WebSocket):
+async def get_search_wb(websocket: WebSocket,
+                        ):
     """
-        Input parameters:
-        - **search_string**: optional, defines keyword to search for
-
-        Response values:
-
         - **name**: full name of professor, user or object
         - **code**: shortcut for name
         - **id**: unique identifier for given entity
@@ -128,13 +124,14 @@ async def get_search_wb(websocket: WebSocket):
                                        order by rn, pointer
                                    ) as tmp2;"""))  # direct sql select into database
             data = rs.fetchall()
-
-            if not data:
-                await websocket.send_json(JSONResponse(content={"message": "There was an error querying desired data."}, status_code=404))
+            if len(data) == 0:
+                await websocket.send_json({"status_code": 404,
+                                           "message": "There was an error querying desired data."})
             else:
                 items = []
                 for row in data:
                     items.append({"name": row[0], "code": row[1], "id": row[2]})
-                await websocket.send_json(json.dumps(items, indent=2))
+                await websocket.send_json({"status_code": 200,
+                                           "message": json.dumps(items, indent=2)})
     except WebSocketDisconnect:
         print("disconnect from websocket")
