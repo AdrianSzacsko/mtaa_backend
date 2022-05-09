@@ -92,9 +92,15 @@ async def get_search_wb(websocket: WebSocket,
     await websocket.accept()
     token = websocket.headers["authorization"]
     db = await async_create_connection()
-    user: User = await auth.async_get_current_user(token=token, db=db)
-    if db:
-        db.close()
+    try:
+        user: User = await auth.async_get_current_user(token=token, db=db)
+        if db:
+            db.close()
+    except HTTPException:
+        await websocket.send_json({"status_code": 403,
+                                   "message": "Authorization failed."})
+        await websocket.close()
+        return
 
     con = engine.connect()
     try:
@@ -129,7 +135,8 @@ async def get_search_wb(websocket: WebSocket,
                                                                lower(search.code) like lower('%{search_string}%') end
                                             ) as tmp
                                        order by rn, pointer
-                                   ) as tmp2;"""))  # direct sql select into database
+                                   ) as tmp2
+                                   limit 1000;"""))  # direct sql select into database
             data = rs.fetchall()
             if len(data) == 0:
                 await websocket.send_json({"status_code": 404,
