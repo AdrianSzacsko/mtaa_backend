@@ -6,7 +6,7 @@ from starlette.status import HTTP_200_OK
 from starlette.websockets import WebSocketDisconnect
 
 from ..schemas import search_schema
-from ..db.database import create_connection
+from ..db.database import create_connection, async_create_connection
 from sqlalchemy.orm import Session
 from sqlalchemy import func, union, select, or_, alias, text
 from typing import List, Optional
@@ -88,7 +88,14 @@ async def get_search_wb(websocket: WebSocket,
         - **code**: shortcut for name
         - **id**: unique identifier for given entity
     """
+
     await websocket.accept()
+    token = websocket.headers["authorization"]
+    db = await async_create_connection()
+    user: User = await auth.async_get_current_user(token=token, db=db)
+    if db:
+        db.close()
+
     con = engine.connect()
     try:
         while True:

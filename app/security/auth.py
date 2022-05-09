@@ -81,3 +81,24 @@ def get_current_user(token: str = Depends(oauth2_scheme),
             detail="Profile not found",
         )
     return user
+
+
+async def async_get_current_user(token: str,
+                     db: Session):
+    """
+    Returns user's id using token and database
+    """
+    token = check_token_validity(token)
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    user = db.query(User).filter(User.id == token.data).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profile not found",
+        )
+    return user

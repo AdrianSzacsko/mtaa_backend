@@ -1,4 +1,3 @@
-import socketio as socketio
 from fastapi import FastAPI
 from .routers import prof, subj, login, register, search, profile
 from fastapi.middleware.cors import CORSMiddleware
